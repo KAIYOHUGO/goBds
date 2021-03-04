@@ -1,4 +1,4 @@
 # goBds
 a bds control panel
 
-# !!!! WIP
+# !!!! still in WIP

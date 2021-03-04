@@ -1,9 +1,9 @@
 package api
 
-// Client ...
+// Gclient ...
 // type =password,cmd,event
 // if type=server,need server,cmd
-type Client struct {
+type Gclient struct {
 	Type     string
 	Name     string
 	Password string

@@ -7,11 +7,13 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+
+	"github.com/gorilla/websocket"
 )
 
-// Rlist ...
+// Plist ...
 // server info
-type Rlist struct {
+type Plist struct {
 	Path   string
 	Proc   *exec.Cmd
 	Out    io.ReadCloser
@@ -19,7 +21,20 @@ type Rlist struct {
 	Status int8
 }
 
-func (s *Rlist) Start() {
+// Setup ...
+// setup server; need setup before run any mothed
+func (s *Plist) Setup() {
+	msg.Log("run setup")
+	s.Proc = exec.Command(s.Path)
+	s.Out, _ = s.Proc.StdoutPipe()
+	s.In, _ = s.Proc.StdinPipe()
+	s.Status = 0
+	io.Copy(os.Stdout, s.Out)
+}
+
+// Start ...
+// start server & wait it off
+func (s *Plist) Start() {
 	if s.Status > 0 {
 		return
 	}
@@ -38,19 +53,16 @@ func (s *Rlist) Start() {
 	s.Setup()
 	return
 }
-func (s *Rlist) Setup() {
-	msg.Log("run setup")
-	s.Proc = exec.Command(s.Path)
-	s.Out, _ = s.Proc.StdoutPipe()
-	s.In, _ = s.Proc.StdinPipe()
-	s.Status = 0
-	io.Copy(os.Stdout, s.Out)
-}
-func (s *Rlist) Stop() {
+
+// Stop ...
+// stop server== .cmd("stop")
+func (s *Plist) Stop() {
 	s.Cmd("stop")
 }
 
-func (s *Rlist) Kill() {
+// Kill ...
+// kill process
+func (s *Plist) Kill() {
 	if s.Status == 0 {
 		msg.Wan("kill status==0")
 		return
@@ -61,7 +73,9 @@ func (s *Rlist) Kill() {
 	}
 }
 
-func (s *Rlist) Cmd(c string) {
+// Cmd ...
+// run cmd in terminal
+func (s *Plist) Cmd(c string) {
 	if s.Status <= 0 {
 		msg.Wan("cmd status<=0" + strconv.Itoa(int(s.Status)))
 		return
@@ -73,19 +87,15 @@ func (s *Rlist) Cmd(c string) {
 	}
 }
 
-// Rlist ...
-// server info
-// type Rlist struct {
-// 	Name map[string]struct {
-// 		Out    io.ReadCloser
-// 		In     io.WriteCloser
-// 		Status bool
-// 	}
-// }
+type Pwss struct {
+	Ws   *websocket.Conn
+	Send chan interface{}
+	Get  chan interface{}
+}
 
-// Rrun ...
-// send to chan
-type Rrun struct {
+// Prun ...
+// idk
+type Prun struct {
 	Name string
 	Cmd  string
 }

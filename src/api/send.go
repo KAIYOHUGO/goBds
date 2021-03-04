@@ -8,6 +8,7 @@ type Sstatus struct {
 	Status bool
 }
 
+// Sinfo ...
 type Sinfo struct {
 	Status bool
 	Info   int8

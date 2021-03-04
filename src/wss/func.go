@@ -8,22 +8,23 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func echo(w http.ResponseWriter, r *http.Request) {
+var upgrade = websocket.Upgrader{
+	HandshakeTimeout: 0,
+	ReadBufferSize:   0,
+	WriteBufferSize:  0,
+	WriteBufferPool:  nil,
+	Subprotocols:     []string{},
+	Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
+	},
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+	EnableCompression: false,
+}
+
+func echoAPI(w http.ResponseWriter, r *http.Request) {
 	var (
-		upgrade = websocket.Upgrader{
-			HandshakeTimeout: 0,
-			ReadBufferSize:   0,
-			WriteBufferSize:  0,
-			WriteBufferPool:  nil,
-			Subprotocols:     []string{},
-			Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
-			},
-			CheckOrigin: func(r *http.Request) bool {
-				return true
-			},
-			EnableCompression: false,
-		}
-		client api.Client
+		client api.Gclient
 		login  = false
 		send   = make(chan interface{})
 	)
@@ -50,4 +51,18 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		send <- get(client, &login)
 	}
 	return
+}
+func echoCmd(w http.ResponseWriter, r *http.Request) {
+	ws, err := upgrade.Upgrade(w, r, nil)
+	if err != nil {
+		msg.Err("wss echo", err)
+		return
+	}
+}
+func echoPlugin(w http.ResponseWriter, r *http.Request) {
+	ws, err := upgrade.Upgrade(w, r, nil)
+	if err != nil {
+		msg.Err("wss echo", err)
+		return
+	}
 }

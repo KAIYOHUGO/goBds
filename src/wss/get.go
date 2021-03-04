@@ -6,20 +6,20 @@ import (
 	"gobds/src/runner"
 )
 
-func get(s api.Client, login *bool) interface{} {
+func get(s api.Gclient, login *bool) interface{} {
 	msg.Log("get !")
 	if *login {
 		switch s.Type {
 		case "cmd":
 			msg.Log("cmd:" + s.Cmd)
-			runner.Cmd <- api.Rrun{
+			runner.Cmd <- api.Prun{
 				Name: s.Name,
 				Cmd:  s.Cmd,
 			}
 			return ok
 		case "event":
 			msg.Log("term:" + s.Cmd)
-			runner.Event <- api.Rrun{
+			runner.Event <- api.Prun{
 				Name: s.Name,
 				Cmd:  s.Cmd,
 			}

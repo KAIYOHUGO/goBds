@@ -58,6 +58,7 @@ func echoCmd(w http.ResponseWriter, r *http.Request) {
 		msg.Err("wss echo", err)
 		return
 	}
+	ws.Close()
 }
 func echoPlugin(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrade.Upgrade(w, r, nil)
@@ -65,4 +66,6 @@ func echoPlugin(w http.ResponseWriter, r *http.Request) {
 		msg.Err("wss echo", err)
 		return
 	}
+	ws.Close()
+
 }

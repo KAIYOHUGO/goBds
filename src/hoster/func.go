@@ -1,4 +1,4 @@
-package runner
+package hoster
 
 import (
 	"gobds/src/msg"
@@ -9,7 +9,7 @@ func listener() {
 		for {
 			select {
 			case e := <-Event:
-				el := List[e.Name]
+				el := ServerList[e.Name]
 				msg.Log("chan event" + e.Cmd)
 				switch e.Cmd {
 				case "start":
@@ -25,7 +25,7 @@ func listener() {
 					msg.Err("unknow type", nil)
 				}
 			case e := <-Cmd:
-				el := List[e.Name]
+				el := ServerList[e.Name]
 				msg.Log("chan cmd")
 				el.Cmd(e.Cmd)
 			}

@@ -1,30 +1,30 @@
-package runner
+package hoster
 
 import (
-	"gobds/src/api"
+	hoster "gobds/src/api"
 	"gobds/src/msg"
 )
 
 var (
-	// List ...
+	// ServerList ...
 	// save server data
-	List = make(map[string]*api.Plist)
+	ServerList = make(map[string]*List)
 	// Event ...
 	// send start,stop,kill cmd
-	Event = make(chan api.Prun)
+	Event = make(chan hoster.Prun)
 	// Cmd ...
 	// send cmd in bds
-	Cmd = make(chan api.Prun)
+	Cmd = make(chan hoster.Prun)
 )
 
 // Run ...
 // core func
 func Run() {
-	List["TOL"] = &api.Plist{
+	ServerList["TOL"] = &List{
 		Path: "C:\\Users\\kymcm\\Documents\\VSCode\\gobds\\bds\\bedrock_server.exe",
 	}
 	msg.Log("setup server")
-	for _, e := range List {
+	for _, e := range ServerList {
 		go e.Setup()
 	}
 	go listener()

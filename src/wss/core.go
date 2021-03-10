@@ -13,9 +13,10 @@ var (
 // Run ...
 // start wss server
 func Run() {
-	http.HandleFunc("/api", echoAPI)
-	http.HandleFunc("/cmd", echoCmd)
-	http.HandleFunc("/plg", echoPlugin)
+	// http.HandleFunc("/login", echoLogin)
+	http.HandleFunc("/ws/api", echoAPI)
+	http.HandleFunc("/ws/cmd", echoCmd)
+	http.HandleFunc("/ws/plg", echoPlugin)
 	// if err := http.ListenAndServeTLS(":6623", "gobds.cert", "gobds.key", nil); err != nil {
 	// 	msg.Err("wss server fail", err)
 	// }

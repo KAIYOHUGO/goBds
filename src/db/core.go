@@ -6,13 +6,18 @@ import (
 
 var (
 	err error
+	db  *leveldb.DB
 )
 
 func Run() {
-	s, err := leveldb.OpenFile("/db/accout.db", nil)
+	db, err := leveldb.OpenFile("/db/accout.db", nil)
 	if err != nil {
 		return
 	}
-	defer s.Close()
+	defer db.Close()
+	if ok, _ := db.Has([]byte("admire"), nil); !ok {
+		db.Put([]byte("admire"), []byte(""), nil)
+	}
 
+	// db.Put([]byte("ad"))
 }

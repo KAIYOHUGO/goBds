@@ -1,7 +1,6 @@
 package wss
 
 import (
-	"gobds/src/api"
 	"gobds/src/msg"
 	"net/http"
 
@@ -24,7 +23,7 @@ var upgrade = websocket.Upgrader{
 
 func echoAPI(w http.ResponseWriter, r *http.Request) {
 	var (
-		client api.Gclient
+		client Client
 		login  = false
 		send   = make(chan interface{})
 	)

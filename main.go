@@ -1,8 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"gobds/src/hoster"
 	"gobds/src/msg"
-	"gobds/src/runner"
 	"gobds/src/wss"
 	"os"
 )
@@ -10,9 +11,14 @@ import (
 func main() {
 	msg.Log("starting ...")
 	msg.Log("start server")
-	runner.Run()
+	hoster.Run()
 	msg.Log("start wss")
-	wss.Run()
+	go wss.Run()
+	for {
+		var n string
+		fmt.Scanln(&n)
+		fmt.Println(n)
+	}
 	msg.Wan("unknow error")
 	os.Exit(3)
 }

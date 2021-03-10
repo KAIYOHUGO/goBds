@@ -1,12 +1,13 @@
 package hoster
 
 import (
+	"bufio"
 	"fmt"
 	"gobds/src/msg"
 	"io"
-	"os"
 	"os/exec"
 	"strconv"
+	"sync"
 )
 
 // List ...
@@ -14,9 +15,10 @@ import (
 type List struct {
 	Path   string
 	Proc   *exec.Cmd
-	Out    io.ReadCloser
-	In     io.WriteCloser
 	Status int8
+	out    io.ReadCloser
+	in     io.WriteCloser
+	Broadcast
 }
 
 // Setup ...
@@ -24,10 +26,15 @@ type List struct {
 func (s *List) Setup() {
 	msg.Log("run setup")
 	s.Proc = exec.Command(s.Path)
-	s.Out, _ = s.Proc.StdoutPipe()
-	s.In, _ = s.Proc.StdinPipe()
+	s.out, _ = s.Proc.StdoutPipe()
+	s.in, _ = s.Proc.StdinPipe()
 	s.Status = 0
-	io.Copy(os.Stdout, s.Out)
+	go func() {
+		o := bufio.NewScanner(s.out)
+		for o.Scan() {
+			s.Broadcast.Say(o.Text())
+		}
+	}()
 }
 
 // Start ...
@@ -78,9 +85,36 @@ func (s *List) Cmd(c string) {
 		msg.Wan("cmd status<=0" + strconv.Itoa(int(s.Status)))
 		return
 	}
-	if _, err := s.In.Write([]byte(c + "\n")); err != nil {
+	if _, err := s.in.Write([]byte(c + "\n")); err != nil {
 		msg.Err("cmd error", err)
 		s.Status = -2
 		return
 	}
+}
+
+type Broadcast struct {
+	list []chan string
+	sync.Mutex
+}
+
+func (s *Broadcast) Add(v chan string) {
+	s.Mutex.Lock()
+	s.list = append(s.list, v)
+	s.Mutex.Unlock()
+}
+func (s *Broadcast) Del(v chan string) {
+	s.Mutex.Lock()
+	for i, el := range s.list {
+		if el == v {
+			s.list[i], s.list = s.list[len(s.list)-1], s.list[:len(s.list)-1]
+		}
+	}
+	s.Mutex.Unlock()
+}
+func (s *Broadcast) Say(v string) {
+	s.Mutex.Lock()
+	for _, el := range s.list {
+		el <- v
+	}
+	s.Mutex.Unlock()
 }

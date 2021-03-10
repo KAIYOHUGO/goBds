@@ -9,9 +9,9 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/errors"
 )
 
-// Session ...
+// session ...
 // put a map [session id]user struct
-type Session struct {
+type session struct {
 	list map[string]User
 }
 
@@ -20,7 +20,7 @@ type Session struct {
 
 // Get ...
 // get session , return user struct
-func (s *Session) Get(v string) (User, error) {
+func (s *session) Get(v string) (User, error) {
 	l, ok := s.list[v]
 	if !ok {
 		return User{}, errors.New("not find")
@@ -34,7 +34,7 @@ func (s *Session) Get(v string) (User, error) {
 
 // Add ...
 // add a sesson ,return session id
-func (s *Session) Add(v string) (string, error) {
+func (s *session) Add(v string) (string, error) {
 	rand.Seed(time.Now().UnixNano())
 	token := make([]byte, 64)
 	if _, err := rand.Read(token); err != nil {
@@ -55,7 +55,7 @@ func (s *Session) Add(v string) (string, error) {
 
 // Del ...
 // delete a sesson ,return nil or err
-func (s *Session) Del(v string) error {
+func (s *session) Del(v string) error {
 	_, ok := s.list[v]
 	if !ok {
 		return errors.New("not find")

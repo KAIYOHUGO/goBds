@@ -2,6 +2,6 @@ package config
 
 import "time"
 
-var (
+const (
 	MaxSessionLiveTime = int64(time.Minute * 60)
 )

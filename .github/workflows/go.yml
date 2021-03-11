@@ -30,14 +30,3 @@ jobs:
           #
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # Path to lcov file
-          path-to-lcov: # default is ./coverage/lcov.info
-          # Job flag name, e.g. "Unit", "Functional", or "Integration". Will be shown in the Coveralls UI.
-          flag-name: # optional
-          # Set to true if you are running parallel jobs, then use "parallel_finished: true" for the last action.
-          parallel: # optional
-          # Set to true for the last action when using "parallel: true".
-          parallel-finished: # optional
-          # Coveralls Enterprise server (more info: https://enterprise.coveralls.io)
-          coveralls-endpoint: # optional, default is https://coveralls.io
-          # The root folder of the project that originally ran the tests
-          base-path: # optional

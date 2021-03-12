@@ -4,4 +4,5 @@ import "testing"
 
 func TestMain(t *testing.T) {
 	go main()
+	<-testmain
 }

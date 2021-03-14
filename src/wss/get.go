@@ -3,22 +3,22 @@ package wss
 import (
 	"gobds/src/api"
 	"gobds/src/hoster"
-	"gobds/src/msg"
+	"gobds/src/usefull"
 )
 
 func get(s Client, login *bool) interface{} {
-	msg.Log("get !")
+	usefull.Log("get !")
 	if *login {
 		switch s.Type {
 		case "cmd":
-			msg.Log("cmd:" + s.Cmd)
+			usefull.Log("cmd:" + s.Cmd)
 			hoster.Cmd <- api.Prun{
 				Name: s.Name,
 				Cmd:  s.Cmd,
 			}
 			return ok
 		case "event":
-			msg.Log("term:" + s.Cmd)
+			usefull.Log("term:" + s.Cmd)
 			hoster.Event <- api.Prun{
 				Name: s.Name,
 				Cmd:  s.Cmd,

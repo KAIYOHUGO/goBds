@@ -2,7 +2,7 @@ package hoster
 
 import (
 	hoster "gobds/src/api"
-	"gobds/src/msg"
+	"gobds/src/usefull"
 )
 
 var (
@@ -23,7 +23,7 @@ func Run() {
 	ServerList["TOL"] = &List{
 		Path: "C:\\Users\\kymcm\\Documents\\VSCode\\gobds\\bds\\bedrock_server.exe",
 	}
-	msg.Log("setup server")
+	usefull.Log("setup server")
 	for _, e := range ServerList {
 		go e.Setup()
 	}

@@ -1,8 +1,6 @@
 package hoster
 
-import (
-	"gobds/src/msg"
-)
+import "gobds/src/usefull"
 
 func listener() {
 	go func() {
@@ -10,23 +8,23 @@ func listener() {
 			select {
 			case e := <-Event:
 				el := ServerList[e.Name]
-				msg.Log("chan event" + e.Cmd)
+				usefull.Log("chan event" + e.Cmd)
 				switch e.Cmd {
 				case "start":
-					msg.Log("run start")
+					usefull.Log("run start")
 					go el.Start()
 				case "stop":
-					msg.Log("run stop")
+					usefull.Log("run stop")
 					el.Stop()
 				case "kill":
-					msg.Log("run kill")
+					usefull.Log("run kill")
 					el.Kill()
 				default:
-					msg.Err("unknow type", nil)
+					usefull.Err("unknow type", nil)
 				}
 			case e := <-Cmd:
 				el := ServerList[e.Name]
-				msg.Log("chan cmd")
+				usefull.Log("chan cmd")
 				el.Cmd(e.Cmd)
 			}
 		}

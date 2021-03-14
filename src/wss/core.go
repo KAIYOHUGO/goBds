@@ -1,7 +1,7 @@
 package wss
 
 import (
-	"gobds/src/msg"
+	"gobds/src/usefull"
 	"net/http"
 	"os"
 )
@@ -18,11 +18,11 @@ func Run() {
 	http.HandleFunc("/ws/cmd/", echoCmd)
 	http.HandleFunc("/ws/plg/", echoPlugin)
 	// if err := http.ListenAndServeTLS(":6623", "gobds.cert", "gobds.key", nil); err != nil {
-	// 	msg.Err("wss server fail", err)
+	// 	usefull.Err("wss server fail", err)
 	// }
-	msg.Log("start....")
+	usefull.Log("start....")
 	if err = http.ListenAndServe(":6623", nil); err != nil {
-		msg.Err("ws server fail", err)
+		usefull.Err("ws server fail", err)
 		os.Exit(10)
 	}
 }

@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+	"gobds/src/db"
 	"gobds/src/hoster"
-	"gobds/src/msg"
+	"gobds/src/usefull"
 	"gobds/src/wss"
 	"os"
 )
@@ -11,10 +12,11 @@ import (
 var testmain = make(chan struct{})
 
 func main() {
-	msg.Log("starting ...")
-	msg.Log("start server")
+	usefull.Log("starting ...")
+	db.Run()
+	usefull.Log("start server")
 	hoster.Run()
-	msg.Log("start wss")
+	usefull.Log("start wss")
 	go wss.Run()
 	testmain <- struct{}{}
 	for {
@@ -22,6 +24,6 @@ func main() {
 		fmt.Scanln(&n)
 		fmt.Println(n)
 	}
-	msg.Wan("unknow error")
+	usefull.Wan("unknow error")
 	os.Exit(3)
 }

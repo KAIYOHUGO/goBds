@@ -1,7 +1,7 @@
 package wss
 
 import (
-	"gobds/src/msg"
+	"gobds/src/usefull"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -29,14 +29,14 @@ func echoAPI(w http.ResponseWriter, r *http.Request) {
 	)
 	ws, err := upgrade.Upgrade(w, r, nil)
 	if err != nil {
-		msg.Err("wss echo", err)
+		usefull.Err("wss echo", err)
 		return
 	}
 	defer func() {
-		msg.Wan("disconnect")
+		usefull.Wan("disconnect")
 		ws.Close()
 	}()
-	msg.Log("wss connect")
+	usefull.Log("wss connect")
 	go func() {
 		for el := range send {
 			ws.WriteJSON(el)
@@ -54,7 +54,7 @@ func echoAPI(w http.ResponseWriter, r *http.Request) {
 func echoPlugin(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrade.Upgrade(w, r, nil)
 	if err != nil {
-		msg.Err("wss echo", err)
+		usefull.Err("wss echo", err)
 		return
 	}
 	ws.Close()

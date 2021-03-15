@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script defer>
+      var t;
+      const conn = () => {
+          t = new WebSocket("ws://localhost:6623/ws/api/");
+          t.onmessage = (e) => {
+            document
+              .querySelector("#output")
+              .appendChild(
+                document
+                  .createElement("p")
+                  .appendChild(document.createTextNode(e.data))
+              );
+          };
+        },
+        login = () => {};
+    </script>
+  </head>
+  <body>
+    <button onclick="conn()">connect</button>
+    <button onclick="login()">login</button>
+    <button onclick="">start</button>
+    <div id="output"></div>
+  </body>
+</html>

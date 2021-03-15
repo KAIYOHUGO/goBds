@@ -4,10 +4,25 @@ import (
 	"gobds/src/usefull"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/websocket"
 )
 
 var (
-	err error
+	err     error
+	upgrade = websocket.Upgrader{
+		HandshakeTimeout: 0,
+		ReadBufferSize:   0,
+		WriteBufferSize:  0,
+		WriteBufferPool:  nil,
+		Subprotocols:     []string{},
+		Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
+		},
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+		EnableCompression: false,
+	}
 )
 
 // Run ...

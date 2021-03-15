@@ -8,7 +8,7 @@ var (
 )
 
 // Client ...
-// type =password,cmd,event
+// type =login,cmd,event
 // if type=server,need server,cmd
 type Client struct {
 	Type     string `json:"type,omitempty"`

@@ -1,4 +1,4 @@
-package session
+package usefull
 
 import (
 	"encoding/base64"
@@ -9,8 +9,10 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/errors"
 )
 
-// session ...
-// put a map [session id]user struct
+var (
+	Session = &session{}
+)
+
 type session struct {
 	list map[string]User
 }
@@ -35,7 +37,6 @@ func (s *session) Get(v string) (User, error) {
 // Add ...
 // add a sesson ,return session id
 func (s *session) Add(v string) (string, error) {
-	rand.Seed(time.Now().UnixNano())
 	token := make([]byte, 64)
 	if _, err := rand.Read(token); err != nil {
 		return "", err
@@ -67,4 +68,14 @@ func (s *session) Del(v string) error {
 type User struct {
 	Name string
 	time int64
+}
+
+func CheckTime() {
+	for t := range time.NewTimer(time.Duration(config.MaxSessionLiveTime)).C {
+		for i, el := range Session.list {
+			if el.time+config.MaxSessionLiveTime < t.Unix() {
+				Session.Del(i)
+			}
+		}
+	}
 }

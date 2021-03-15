@@ -6,13 +6,16 @@ import (
 	"gobds/src/hoster"
 	"gobds/src/usefull"
 	"gobds/src/wss"
+	"math/rand"
 	"os"
+	"time"
 )
 
 var testmain = make(chan struct{})
 
 func main() {
 	usefull.Log("starting ...")
+	rand.Seed(time.Now().UnixNano())
 	db.Run()
 	usefull.Log("start server")
 	hoster.Run()

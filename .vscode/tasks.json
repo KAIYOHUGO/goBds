@@ -8,6 +8,15 @@
       "type": "shell",
       "command": ["go clean &&", "go run ${workspaceFolder}\\main.go"],
       "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "go test",
+      "type": "shell",
+      "command": ["go test -v ${fileDirname}"],
+      "group": {
         "kind": "test",
         "isDefault": true
       }

@@ -5,12 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch file",
+      "name": "debug file",
       "type": "go",
       "request": "launch",
-      "mode": "auto",
-      "program": "${workspaceFolder}",
-      "stopOnEntry": false
+      "mode": "debug",
+      "program": "${workspaceFolder}"
+    },
+    {
+      "name": "test func",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${file}"
     }
   ]
 }

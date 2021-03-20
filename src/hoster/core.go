@@ -1,8 +1,6 @@
 package hoster
 
 import (
-	"fmt"
-	hoster "gobds/src/api"
 	"gobds/src/usefull"
 )
 
@@ -12,22 +10,18 @@ var (
 	ServerList = make(map[string]*List)
 	// Event ...
 	// send start,stop,kill cmd
-	Event = make(chan hoster.Prun)
+	// Event = make(chan string)
 	// Cmd ...
 	// send cmd in bds
-	Cmd = make(chan hoster.Prun)
+	// Cmd = make(chan string)
 )
 
 // Run ...
 // core func
 func Run() {
-	// ServerList["TOL"] = &List{
-	// 	Path: "C:\\Users\\kymcm\\Documents\\VSCode\\gobds\\bds\\bedrock_server.exe",
-	// }
 	usefull.Log("setup server")
 	for _, e := range ServerList {
-		go e.Setup()
+		e.init()
+		go e.setup()
 	}
-	fmt.Println(ServerList["TOL"])
-	go listener()
 }

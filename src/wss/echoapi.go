@@ -22,7 +22,7 @@ func echoAPI(w http.ResponseWriter, r *http.Request) {
 		conn   bool = true
 	)
 	token := r.URL.Path[len("ws/api/"):]
-	if user, err := usefull.Session.Get(token); err != nil {
+	if user, err := Session.Get(token); err != nil {
 		go func() {
 			for conn {
 				if err = ws.ReadJSON(&client); err != nil {
@@ -37,7 +37,7 @@ func echoAPI(w http.ResponseWriter, r *http.Request) {
 						ws.WriteJSON(unFind)
 						continue
 					} else {
-						// user
+						client.Password
 						continue
 					}
 				}

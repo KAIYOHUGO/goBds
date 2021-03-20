@@ -1,5 +1,8 @@
 package db
 
 type User struct {
-	Password []byte
+	Name          string
+	Password      []byte
+	OwnServerList []string
+	Permission    int8
 }

@@ -6,22 +6,22 @@ import (
 )
 
 type Broadcast struct {
-	list *list.List
+	List *list.List
 	sync.Mutex
 }
 
-func NewBroadcast() *Broadcast {
-	return &Broadcast{list: list.New()}
-}
+// func (s *Broadcast) Init() {
+// s.list = list.New()
+// }
 func (s *Broadcast) Add(v chan interface{}) *list.Element {
-	return s.list.PushBack(v)
+	return s.List.PushBack(v)
 }
 func (s *Broadcast) Del(v *list.Element) {
-	s.list.Remove(v)
+	s.List.Remove(v)
 }
 func (s *Broadcast) Say(v interface{}) {
-	s.Mutex.Lock()
-	for i := s.list.Front(); i != nil; i = i.Next() {
+	s.Lock()
+	for i := s.List.Front(); i != nil; i = i.Next() {
 		select {
 		case <-i.Value.(chan interface{}):
 			s.Del(i)
@@ -29,5 +29,5 @@ func (s *Broadcast) Say(v interface{}) {
 			i.Value.(chan interface{}) <- v
 		}
 	}
-	s.Mutex.Unlock()
+	s.Unlock()
 }

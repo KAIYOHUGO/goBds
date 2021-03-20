@@ -1,10 +1,10 @@
 package wss
 
 var (
-	ok           = Server{Status: 200}
-	fail         = Server{Status: 500}
-	noPermission = Server{Status: 400}
-	unFind       = Server{Status: 404}
+	ok           = Server{Code: 200, Messenge: "ok"}
+	fail         = Server{Code: 500, Messenge: "server fail"}
+	noPermission = Server{Code: 400, Messenge: "you don't have permission"}
+	unFind       = Server{Code: 404, Messenge: "unfind json node"}
 )
 
 // Client ...
@@ -20,7 +20,8 @@ type Client struct {
 type Server struct {
 	// `json:",omitempty"`
 	// like http code
-	Status int `json:"status,omitempty"`
+	Code     int    `json:"code,omitempty"`
+	Messenge string `json:"messenge,omitempty"`
 	// terminal,login,
 	// Type   string `json:"type,omitempty"`
 	Session    string   `json:"session,omitempty"`
@@ -46,23 +47,4 @@ type Server struct {
 // return bool,true mean something is right
 type Sstatus struct {
 	Status bool
-}
-
-// Sinfo ...
-type Sinfo struct {
-	Status bool
-	Info   int8
-}
-
-// Slist ...
-// return name + status array
-type Slist []struct {
-	Name   string
-	Status bool
-}
-
-// Sterminal ...
-// return line
-type Sterminal struct {
-	line string
 }

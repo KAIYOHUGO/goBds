@@ -3,6 +3,7 @@ package db
 import (
 	"bytes"
 	"crypto"
+	_ "crypto/sha1"
 	"encoding/gob"
 	"fmt"
 	"gobds/src/hoster"

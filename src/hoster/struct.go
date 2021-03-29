@@ -56,11 +56,11 @@ func (s *List) setup() {
 		usefull.Err("cant start", err)
 		s.Status = -1
 	}
-	wg := true
+	wg := make(chan struct{})
 	usefull.Log("start!")
 	go func() {
 		o := bufio.NewScanner(s.out)
-		for o.Scan() && wg {
+		for o.Scan() {
 			s.Broadcast.Say(o.Text())
 			println(o.Text())
 		}
@@ -69,7 +69,7 @@ func (s *List) setup() {
 		}
 	}()
 	go func() {
-		for wg {
+		for {
 			select {
 			case t := <-s.EventChan:
 				switch t {
@@ -92,11 +92,13 @@ func (s *List) setup() {
 				if s.cmd(t) != nil {
 					return
 				}
+			case <-wg:
+				return
 			}
 		}
 	}()
 	s.proc.Wait()
-	wg = false
+	wg <- struct{}{}
 	usefull.Wan("server stop")
 	s.setup()
 }

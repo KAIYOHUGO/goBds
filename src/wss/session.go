@@ -35,6 +35,7 @@ func (s *session) Get(v string) (User, error) {
 		s.Del(v)
 		return User{}, errors.New("died")
 	}
+	l.time = time.Now().Unix()
 	s.Unlock()
 	return l, nil
 }
@@ -73,11 +74,6 @@ func (s *session) Del(v string) error {
 	return nil
 }
 
-type User struct {
-	time int64
-	info *db.User
-}
-
 func CheckTime() {
 	for t := range time.NewTimer(time.Duration(config.MaxSessionLiveTime)).C {
 		for i, el := range Session.list {
@@ -86,4 +82,9 @@ func CheckTime() {
 			}
 		}
 	}
+}
+
+type User struct {
+	time int64
+	info *db.User
 }

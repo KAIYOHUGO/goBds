@@ -1,6 +1,7 @@
 package wss
 
 import (
+	"gobds/src/config"
 	"gobds/src/usefull"
 	"net/http"
 	"os"
@@ -12,8 +13,8 @@ var (
 	err     error
 	upgrade = websocket.Upgrader{
 		HandshakeTimeout: 0,
-		ReadBufferSize:   0,
-		WriteBufferSize:  0,
+		ReadBufferSize:   config.MaxWSBufferSize,
+		WriteBufferSize:  config.MaxWSBufferSize,
 		WriteBufferPool:  nil,
 		Subprotocols:     []string{},
 		Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {

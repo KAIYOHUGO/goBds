@@ -6,7 +6,7 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	ServerList["TOL"] = &List{Path: "C:\\Users\\kymcm\\Documents\\VSCode\\gobds\\bds\\testserver.bat"}
+	ServerList["TOL"] = &List{Path: "./../../bds/testserver.sh"}
 	Run()
 	ServerList["TOL"].EventChan <- "start"
 	time.Sleep(time.Second * 2)

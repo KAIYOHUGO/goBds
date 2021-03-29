@@ -1,8 +1,11 @@
 package wss
 
 import (
+	"gobds/src/hoster"
 	"gobds/src/usefull"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
 func echoAPI(w http.ResponseWriter, r *http.Request) {
@@ -16,35 +19,42 @@ func echoAPI(w http.ResponseWriter, r *http.Request) {
 		ws.Close()
 	}()
 	usefull.Log("wss connect")
-	var (
-		client Client
-		server Server
-		conn   bool = true
-	)
-	token := r.URL.Path[len("ws/api/"):]
-	if user, err := Session.Get(token); err != nil {
-		go func() {
-			for conn {
-				if err = ws.ReadJSON(&client); err != nil {
-					conn = false
+	for {
+		var (
+			client Client
+		)
+		if err = ws.ReadJSON(&client); err != nil {
+			if websocket.IsCloseError(err) {
+				return
+			}
+			ws.WriteJSON(fail)
+		}
+		user, err := Session.Get(client.Session)
+		if err != nil {
+			switch client.Type {
+			case "login":
+
+			default:
+				ws.WriteJSON(noPermission)
+			}
+			continue
+		}
+		switch client.Type {
+		case "event":
+			if client.Event == "" || client.ServerName == "" {
+				ws.WriteJSON(unFind)
+				continue
+			}
+			for _, el := range user.info.OwnServerList {
+				if client.ServerName == el {
+					hoster.ServerList[el].EventChan <- client.Event
 					break
 				}
-				if client.Type != "login" {
-					ws.WriteJSON(noPermission)
-					continue
-				} else {
-					if client.Password == "" {
-						ws.WriteJSON(unFind)
-						continue
-					} else {
-						client.Password
-						continue
-					}
-				}
 			}
-		}()
-	} else {
 
+		default:
+			ws.WriteJSON(unFind)
+		}
 	}
 	return
 }

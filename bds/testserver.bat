@@ -1,3 +1,7 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:f7063e343b2465b27a24a07f124f6c7d3bd97b8d89de3e65b3bf119a12a7cebb
-size 101
+@echo off
+
+echo server start
+:w
+set /p a="wait input :"
+if %a% neq stop goto w
+echo server stop

@@ -11,9 +11,9 @@ func TestRun(t *testing.T) {
 	ServerList["TOL"].EventChan <- "start"
 	time.Sleep(time.Second * 2)
 	ServerList["TOL"].EventChan <- "kill"
-	time.Sleep(time.Second * 1)
-	ServerList["TOL"].EventChan <- "start"
-	time.Sleep(time.Second * 1)
-	ServerList["TOL"].EventChan <- "restart"
 	time.Sleep(time.Second * 2)
+	ServerList["TOL"].EventChan <- "start"
+	time.Sleep(time.Second * 2)
+	ServerList["TOL"].EventChan <- "restart"
+	time.Sleep(time.Second * 4)
 }

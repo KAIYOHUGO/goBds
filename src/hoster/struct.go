@@ -37,13 +37,14 @@ func (s *List) setup() {
 	s.out, _ = s.proc.StdoutPipe()
 	s.in, _ = s.proc.StdinPipe()
 	s.Status = 0
-	defer func() {
+	gc := func() {
 		s.out.Close()
 		s.in.Close()
 		if s.Status != 0 {
 			s.kill()
 		}
-	}()
+	}
+	defer gc()
 	for {
 		if t := <-s.EventChan; t == "start" {
 			break
@@ -100,6 +101,7 @@ func (s *List) setup() {
 	s.proc.Wait()
 	wg <- struct{}{}
 	usefull.Wan("server stop")
+	gc()
 	s.setup()
 }
 

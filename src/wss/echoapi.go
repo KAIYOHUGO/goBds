@@ -33,6 +33,10 @@ func echoAPI(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			switch client.Type {
 			case "login":
+				if client.Password == "" {
+					ws.WriteJSON(unFind)
+					continue
+				}
 
 			default:
 				ws.WriteJSON(noPermission)
@@ -56,5 +60,4 @@ func echoAPI(w http.ResponseWriter, r *http.Request) {
 			ws.WriteJSON(unFind)
 		}
 	}
-	return
 }

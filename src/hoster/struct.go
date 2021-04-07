@@ -27,6 +27,11 @@ func (s *List) init() {
 	s.EventChan = make(chan string, 5)
 	s.CmdChan = make(chan string, 5)
 	s.Broadcast = &usefull.Broadcast{List: list.New()}
+	go func() {
+		for {
+			s.setup()
+		}
+	}()
 }
 
 // setup ...
@@ -37,14 +42,14 @@ func (s *List) setup() {
 	s.out, _ = s.proc.StdoutPipe()
 	s.in, _ = s.proc.StdinPipe()
 	s.Status = 0
-	gc := func() {
+	defer func() {
 		s.out.Close()
 		s.in.Close()
+		usefull.Wan("server stop")
 		if s.Status != 0 {
 			s.kill()
 		}
-	}
-	defer gc()
+	}()
 	for {
 		if t := <-s.EventChan; t == "start" {
 			break
@@ -100,9 +105,6 @@ func (s *List) setup() {
 	}()
 	s.proc.Wait()
 	wg <- struct{}{}
-	usefull.Wan("server stop")
-	gc()
-	s.setup()
 }
 
 // kill ...
@@ -132,5 +134,6 @@ func (s *List) cmd(c string) error {
 		s.Status = -2
 		return errors.New("unknow cmd error")
 	}
+	usefull.Log("run cmd:" + c)
 	return nil
 }

@@ -22,6 +22,5 @@ func Run() {
 	usefull.Log("setup server")
 	for _, e := range ServerList {
 		e.init()
-		go e.setup()
 	}
 }

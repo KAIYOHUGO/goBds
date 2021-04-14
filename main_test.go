@@ -1,8 +1,12 @@
 package main
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestMain(t *testing.T) {
 	go main()
-	<-testmain
+	time.Sleep(time.Second * 20)
+
 }

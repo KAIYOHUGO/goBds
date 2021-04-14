@@ -1,6 +1,11 @@
 package wss
 
 import (
+	"bytes"
+	"crypto"
+	_ "crypto/sha1"
+	"gobds/src/config"
+	"gobds/src/db"
 	"gobds/src/hoster"
 	"gobds/src/usefull"
 	"net/http"
@@ -33,11 +38,37 @@ func echoAPI(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			switch client.Type {
 			case "login":
-				if client.Password == "" {
-					ws.WriteJSON(unFind)
+				if client.Password == "" || client.Name == "" {
+					ws.WriteJSON(badRequest)
 					continue
 				}
-
+				if len(client.Password) > config.MaxAPIPayloadLen || len(client.Name) > config.MaxAPIPayloadLen {
+					ws.WriteJSON(tooLarge)
+					continue
+				}
+				pass, err := db.DataBase.Search("account", []byte(client.Name))
+				if err != nil {
+					ws.WriteJSON(notFind)
+					continue
+				}
+				sha := crypto.SHA1.New()
+				if sha.Write([]byte(client.Password)); !bytes.Equal(sha.Sum(nil), pass) {
+					ws.WriteJSON(notFind)
+					continue
+				}
+				s, err := Session.Add()
+				if err != nil {
+					ws.WriteJSON(fail)
+					continue
+				}
+				ws.WriteJSON(Server{
+					Code:       200,
+					Messenge:   "login suceess",
+					Session:    s,
+					Terminal:   []string{},
+					ServerList: []string{},
+				})
+				continue
 			default:
 				ws.WriteJSON(noPermission)
 			}
@@ -46,18 +77,22 @@ func echoAPI(w http.ResponseWriter, r *http.Request) {
 		switch client.Type {
 		case "event":
 			if client.Event == "" || client.ServerName == "" {
-				ws.WriteJSON(unFind)
+				ws.WriteJSON(badRequest)
 				continue
 			}
 			for _, el := range user.info.OwnServerList {
 				if client.ServerName == el {
-					hoster.ServerList[el].EventChan <- client.Event
+					select {
+					case hoster.ServerList[el].EventChan <- client.Event:
+					default:
+						ws.WriteJSON(fail)
+					}
 					break
 				}
 			}
 
 		default:
-			ws.WriteJSON(unFind)
+			ws.WriteJSON(badRequest)
 		}
 	}
 }

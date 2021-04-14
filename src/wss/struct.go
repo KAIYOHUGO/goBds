@@ -2,9 +2,11 @@ package wss
 
 var (
 	ok           = Server{Code: 200, Messenge: "ok"}
+	badRequest   = Server{Code: 400, Messenge: "bad Request! can you follow api?"}
+	noPermission = Server{Code: 401, Messenge: "you don't have permission"}
+	notFind      = Server{Code: 404, Messenge: "can not find json node or value"}
+	tooLarge     = Server{Code: 413, Messenge: "payload too large"}
 	fail         = Server{Code: 500, Messenge: "server fail"}
-	noPermission = Server{Code: 400, Messenge: "you don't have permission"}
-	unFind       = Server{Code: 404, Messenge: "unfind json node or value"}
 )
 
 // Client ...
@@ -13,8 +15,9 @@ type Client struct {
 	// type =login,cmd,event
 	Type       string `json:"type,omitempty"`
 	Session    string `json:"session,omitempty"`
-	ServerName string `json:"servername,omitempty"`
+	Name       string `json:"name,omitempty"`
 	Password   string `json:"password,omitempty"`
+	ServerName string `json:"servername,omitempty"`
 	Cmd        string `json:"cmd,omitempty"`
 	Event      string `json:"event,omitempty"`
 	FileName   string `json:"filename,omitempty"`

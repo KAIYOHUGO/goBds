@@ -42,7 +42,7 @@ func (s *session) Get(v string) (User, error) {
 
 // Add ...
 // add a sesson ,return session id
-func (s *session) Add(v string) (string, error) {
+func (s *session) Add() (string, error) {
 	token := make([]byte, 64)
 	if _, err := rand.Read(token); err != nil {
 		return "", err

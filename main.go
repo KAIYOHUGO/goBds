@@ -11,17 +11,17 @@ import (
 	"time"
 )
 
-var testmain = make(chan struct{})
-
 func main() {
 	usefull.Log("starting ...")
+	defer func() {
+		db.GC()
+	}()
 	rand.Seed(time.Now().UnixNano())
 	db.Run()
 	usefull.Log("start server")
 	hoster.Run()
 	usefull.Log("start wss")
 	go wss.Run()
-	testmain <- struct{}{}
 	for {
 		var n string
 		fmt.Scanln(&n)

@@ -2,12 +2,15 @@ package db
 
 import (
 	"bytes"
+	"crypto"
+	_ "crypto/sha1"
 	"encoding/gob"
 	"errors"
 	"fmt"
 	"gobds/src/hoster"
-	"gobds/vendor/github.com/syndtr/goleveldb/leveldb"
 	"os"
+
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 // database struct
@@ -22,6 +25,10 @@ type User struct {
 }
 
 func (v *DB) init() {
+	var (
+		encode bytes.Buffer
+		sha    = crypto.SHA1.New()
+	)
 	dbAccout, err := leveldb.OpenFile("./db/accout.db", nil)
 	if err != nil {
 		os.Exit(15)
@@ -32,6 +39,7 @@ func (v *DB) init() {
 	}
 	defer func() {
 		fmt.Println("close")
+		dbServer.Close()
 	}()
 	if ok, _ := dbAccout.Has([]byte("admire"), nil); !ok {
 		sha.Reset()
@@ -39,21 +47,20 @@ func (v *DB) init() {
 		dbAccout.Put([]byte("admire"), sha.Sum(nil), nil)
 	}
 	if ok, _ := dbServer.Has([]byte("TOL"), nil); !ok {
-		encoder.Encode(hoster.List{
+		gob.NewEncoder(&encode).Encode(hoster.List{
 			Path: "./testserver.sh",
 		})
 		dbServer.Put([]byte("TOL"), encode.Bytes(), nil)
 	}
 	it := dbServer.NewIterator(nil, nil)
+	defer it.Release()
 	fmt.Println("start it")
 	for it.Next() {
 		var decode hoster.List
 		gob.NewDecoder(bytes.NewBuffer(it.Value())).Decode(&decode)
 		hoster.ServerList[string(it.Key())] = &decode
 	}
-	it.Release()
 	v.dblist["accout"] = dbAccout
-	dbServer.Close()
 }
 func (v *DB) Search(d string, k []byte) ([]byte, error) {
 	db, ok := v.dblist[d]
@@ -66,6 +73,17 @@ func (v *DB) Search(d string, k []byte) ([]byte, error) {
 	}
 	return b, nil
 
+}
+func (v *DB) SearchStruct(d string, k []byte, s *struct{}) error {
+	db, ok := v.dblist[d]
+	if !ok {
+		return errors.New("not find database")
+	}
+	b, err := db.Get(k, nil)
+	if err != nil {
+		return errors.New("not find in database")
+	}
+	return gob.NewDecoder(bytes.NewBuffer(b)).Decode(s)
 }
 
 // func (v *DB) init() {

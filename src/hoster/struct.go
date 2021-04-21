@@ -103,7 +103,10 @@ func (s *List) setup() {
 			}
 		}
 	}()
-	s.proc.Wait()
+	err := s.proc.Wait()
+	if err != nil {
+		s.Status = -2
+	}
 	wg <- struct{}{}
 }
 

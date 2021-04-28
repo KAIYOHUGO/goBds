@@ -7,25 +7,28 @@ import (
 	"gobds/src/usefull"
 	"io"
 	"os/exec"
-	"strconv"
 )
 
 // List ...
 // server info
 type List struct {
-	Path      string
-	proc      *exec.Cmd
-	Status    int8
+	Path string
+	proc *exec.Cmd
+	// Status level
+	// 0 close or start fail
+	// 1 runing
+	// 2 cmd error
+	// 3 GC error
+	// 4 kill error
+	Status    uint8
 	out       io.ReadCloser
 	in        io.WriteCloser
 	Broadcast *usefull.Broadcast
-	EventChan chan string
 	CmdChan   chan string
 }
 
 func (s *List) init() {
-	s.EventChan = make(chan string, 5)
-	s.CmdChan = make(chan string, 5)
+	s.CmdChan = make(chan string, 10)
 	s.Broadcast = &usefull.Broadcast{List: list.New()}
 	go func() {
 		for {
@@ -42,84 +45,80 @@ func (s *List) setup() {
 	s.out, _ = s.proc.StdoutPipe()
 	s.in, _ = s.proc.StdinPipe()
 	s.Status = 0
+	wg := make(chan struct{})
 	defer func() {
+		usefull.Wan("server stop")
 		s.out.Close()
 		s.in.Close()
-		usefull.Wan("server stop")
-		if s.Status != 0 {
+		close(wg)
+		if s.Status > 0 {
 			s.kill()
 		}
 	}()
-	for {
-		if t := <-s.EventChan; t == "start" {
-			break
-		}
-	}
-	s.Status = 1
-	// start proc
-	if err := s.proc.Start(); err != nil {
-		usefull.Log(strconv.Itoa(int(s.Status)))
-		usefull.Err("cant start", err)
-		s.Status = -1
-	}
-	wg := make(chan struct{})
-	usefull.Log("start!")
 	go func() {
 		o := bufio.NewScanner(s.out)
 		for o.Scan() {
 			s.Broadcast.Say(o.Text())
-			println(o.Text())
 		}
 		if o.Err() != nil {
 			usefull.Log("close")
 		}
 	}()
-	go func() {
-		for {
-			select {
-			case t := <-s.EventChan:
-				switch t {
-				case "stop":
-					if s.cmd("stop") == nil {
-						return
-					}
-				case "kill":
-					if s.kill() == nil {
-						return
-					}
-				case "restart":
-					go func() {
-						s.EventChan <- "stop"
-						s.EventChan <- "kill"
-						s.EventChan <- "start"
-					}()
-				}
-			case t := <-s.CmdChan:
-				if s.cmd(t) != nil {
-					return
-				}
-			case <-wg:
-				return
-			}
+	for v := range s.CmdChan {
+		select {
+		case <-wg:
+			return
+		default:
 		}
-	}()
-	err := s.proc.Wait()
-	if err != nil {
-		s.Status = -2
+		usefull.Log("CMD:" + v)
+		if v[0] == '$' {
+			switch v[1:] {
+			case "start":
+				if s.Status == 0 {
+					if err := s.proc.Start(); err == nil {
+						s.Status = 1
+						go func() {
+							if s.proc.Wait() != nil {
+								s.Status = 3
+							}
+							s.Status = 0
+							wg <- struct{}{}
+						}()
+					}
+				}
+			case "restart":
+				if s.Status > 0 {
+					func() {
+						for {
+							select {
+							case <-s.CmdChan:
+							default:
+								return
+							}
+						}
+					}()
+					s.CmdChan <- "$stop"
+					s.CmdChan <- "$kill"
+					s.CmdChan <- "$start"
+				}
+
+			case "kill":
+				if s.Status > 0 {
+					s.kill()
+				}
+			}
+		} else {
+			s.cmd(v)
+		}
 	}
-	wg <- struct{}{}
 }
 
 // kill ...
 // kill process
 func (s *List) kill() error {
-	if s.Status == 0 {
-		usefull.Wan("kill status==0")
-		return errors.New("server is close")
-	}
 	if err := s.proc.Process.Kill(); err != nil {
 		usefull.Err("kill fail", err)
-		s.Status = -1
+		s.Status = 4
 		return errors.New("cant kill")
 	}
 	return nil
@@ -128,13 +127,9 @@ func (s *List) kill() error {
 // cmd ...
 // run cmd in terminal
 func (s *List) cmd(c string) error {
-	if s.Status <= 0 {
-		usefull.Wan("cmd status<=0" + strconv.Itoa(int(s.Status)))
-		return errors.New("server is close")
-	}
 	if _, err := s.in.Write([]byte(c + "\n")); err != nil {
 		usefull.Err("cmd error", err)
-		s.Status = -2
+		s.Status = 2
 		return errors.New("unknow cmd error")
 	}
 	usefull.Log("run cmd:" + c)

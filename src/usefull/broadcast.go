@@ -23,10 +23,9 @@ func (s *Broadcast) Say(v interface{}) {
 	s.Lock()
 	for i := s.List.Front(); i != nil; i = i.Next() {
 		select {
-		case <-i.Value.(chan interface{}):
-			s.Del(i)
+		case i.Value.(chan interface{}) <- v:
 		default:
-			i.Value.(chan interface{}) <- v
+			s.Del(i)
 		}
 	}
 	s.Unlock()

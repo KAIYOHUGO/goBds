@@ -1,4 +1,4 @@
-package usefull
+package utils
 
 import (
 	"container/list"

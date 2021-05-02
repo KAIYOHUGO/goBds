@@ -2,17 +2,18 @@ package wss
 
 import (
 	"gobds/src/config"
-	"gobds/src/usefull"
+	"gobds/src/database"
+	"gobds/src/utils"
 	"net/http"
-	"os"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
 
 var (
 	err     error
 	upgrade = websocket.Upgrader{
-		HandshakeTimeout: 0,
+		HandshakeTimeout: config.WSHandshakeTimeout,
 		ReadBufferSize:   config.MaxWSBufferSize,
 		WriteBufferSize:  config.MaxWSBufferSize,
 		WriteBufferPool:  nil,
@@ -24,21 +25,26 @@ var (
 		},
 		EnableCompression: false,
 	}
+	server []*config.Server
 )
+
+func init() {
+	database.DB["ServerID"].Read(&server)
+}
 
 // Run ...
 // start wss server
-func Run() {
-	// http.HandleFunc("/login/", echoLogin)
-	http.HandleFunc("/ws/api/", echoAPI)
-	http.HandleFunc("/ws/cmd/", echoCmd)
-	http.HandleFunc("/ws/plg/", echoPlugin)
-	// if err := http.ListenAndServeTLS(":6623", "gobds.cert", "gobds.key", nil); err != nil {
-	// 	usefull.Err("wss server fail", err)
-	// }
-	usefull.Log("start....")
-	if err = http.ListenAndServe(":6623", nil); err != nil {
-		usefull.Err("ws server fail", err)
-		os.Exit(10)
+func ServerTerminal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	ws, err := upgrade.Upgrade(w, r, nil)
+	if err != nil {
+		utils.Err("can not start ws", err)
+		return
+	}
+	defer ws.Close()
+	for _, v := range server {
+		if v.Name == vars["ServerId"] {
+			break
+		}
 	}
 }

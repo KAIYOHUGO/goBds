@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"container/list"
 	"errors"
-	"gobds/src/usefull"
+	"gobds/src/utils"
 	"io"
 	"os/exec"
 )
@@ -23,13 +23,13 @@ type List struct {
 	Status    uint8
 	out       io.ReadCloser
 	in        io.WriteCloser
-	Broadcast *usefull.Broadcast
+	Broadcast *utils.Broadcast
 	CmdChan   chan string
 }
 
 func (s *List) init() {
 	s.CmdChan = make(chan string, 10)
-	s.Broadcast = &usefull.Broadcast{List: list.New()}
+	s.Broadcast = &utils.Broadcast{List: list.New()}
 	go func() {
 		for {
 			s.setup()
@@ -40,14 +40,14 @@ func (s *List) init() {
 // setup ...
 // setup server; need setup before run any mothed
 func (s *List) setup() {
-	usefull.Log("run setup")
+	utils.Log("run setup")
 	s.proc = exec.Command(s.Path)
 	s.out, _ = s.proc.StdoutPipe()
 	s.in, _ = s.proc.StdinPipe()
 	s.Status = 0
 	wg := make(chan struct{})
 	defer func() {
-		usefull.Wan("server stop")
+		utils.Wan("server stop")
 		s.out.Close()
 		s.in.Close()
 		close(wg)
@@ -61,7 +61,7 @@ func (s *List) setup() {
 			s.Broadcast.Say(o.Text())
 		}
 		if o.Err() != nil {
-			usefull.Log("close")
+			utils.Log("close")
 		}
 	}()
 	for v := range s.CmdChan {
@@ -70,7 +70,7 @@ func (s *List) setup() {
 			return
 		default:
 		}
-		usefull.Log("CMD:" + v)
+		utils.Log("CMD:" + v)
 		if v[0] == '$' {
 			switch v[1:] {
 			case "start":
@@ -117,7 +117,7 @@ func (s *List) setup() {
 // kill process
 func (s *List) kill() error {
 	if err := s.proc.Process.Kill(); err != nil {
-		usefull.Err("kill fail", err)
+		utils.Err("kill fail", err)
 		s.Status = 4
 		return errors.New("cant kill")
 	}
@@ -128,10 +128,10 @@ func (s *List) kill() error {
 // run cmd in terminal
 func (s *List) cmd(c string) error {
 	if _, err := s.in.Write([]byte(c + "\n")); err != nil {
-		usefull.Err("cmd error", err)
+		utils.Err("cmd error", err)
 		s.Status = 2
 		return errors.New("unknow cmd error")
 	}
-	usefull.Log("run cmd:" + c)
+	utils.Log("run cmd:" + c)
 	return nil
 }

@@ -1,7 +1,7 @@
 package hoster
 
 import (
-	"gobds/src/usefull"
+	"gobds/src/utils"
 	"testing"
 	"time"
 )
@@ -14,7 +14,7 @@ func TestRun(t *testing.T) {
 	ServerList["TOL"].Broadcast.Add(s)
 	go func() {
 		for i := range s {
-			usefull.Log("broadcast:" + i.(string))
+			utils.Log("broadcast:" + i.(string))
 		}
 	}()
 	// time.Sleep(time.Second * 2)

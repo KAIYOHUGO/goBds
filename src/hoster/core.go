@@ -1,7 +1,7 @@
 package hoster
 
 import (
-	"gobds/src/usefull"
+	"gobds/src/utils"
 )
 
 var (
@@ -19,7 +19,7 @@ var (
 // Run ...
 // core func
 func Run() {
-	usefull.Log("setup server")
+	utils.Log("setup server")
 	for _, e := range ServerList {
 		e.init()
 	}

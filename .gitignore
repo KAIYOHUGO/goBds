@@ -2,3 +2,4 @@
 /bds/*
 /coverage.*
 test.*
+/vendor/*

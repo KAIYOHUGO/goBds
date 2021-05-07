@@ -1,8 +1,0 @@
-# github.com/dgraph-io/badger/v3 v3.2011.1
-## explicit
-# github.com/gorilla/mux v1.8.0
-## explicit
-github.com/gorilla/mux
-# github.com/gorilla/websocket v1.4.2
-## explicit
-github.com/gorilla/websocket

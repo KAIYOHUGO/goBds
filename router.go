@@ -32,6 +32,6 @@ func router() {
 		rapi.HandleFunc("/server/{ServerID}", api.PUTServerFile).Methods("PUT")
 	}
 	// wss
-	r.HandleFunc("wss/server/{ServerID}", wss.ServerTerminal)
+	r.HandleFunc("wss/server/{ServerID}/terminal/{SessionID}", wss.ServerTerminal)
 	http.ListenAndServe(":6623", r)
 }

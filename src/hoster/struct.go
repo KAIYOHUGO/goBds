@@ -12,6 +12,7 @@ import (
 // List ...
 // server info
 type List struct {
+	Name string
 	Path string
 	proc *exec.Cmd
 	// Status level
@@ -32,14 +33,14 @@ func (s *List) init() {
 	s.Broadcast = &utils.Broadcast{List: list.New()}
 	go func() {
 		for {
-			s.setup()
+			s.run()
 		}
 	}()
 }
 
 // setup ...
 // setup server; need setup before run any mothed
-func (s *List) setup() {
+func (s *List) run() {
 	utils.Log("run setup")
 	s.proc = exec.Command(s.Path)
 	s.out, _ = s.proc.StdoutPipe()

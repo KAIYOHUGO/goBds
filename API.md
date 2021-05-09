@@ -17,6 +17,6 @@
  |
  |-wss/+
        |-server/{ServerID}/+
-                            |-terminal
+                            |-terminal/{SessionID}
 
 ```

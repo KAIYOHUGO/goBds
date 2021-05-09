@@ -1,4 +1,4 @@
-name: build Go & test
+name: build Go & Test
 
 on:
   push:
@@ -21,6 +21,7 @@ jobs:
       - name: Build
         run: go build -v ./...
   coverage:
+    # runs-on: ubuntu-latest
     needs: [build]
     steps:
       - uses: actions/checkout@v2

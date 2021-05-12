@@ -15,7 +15,7 @@
     {
       "label": "go test",
       "type": "shell",
-      "command": "go test -v ${fileDirname}",
+      "command": "go test -v ${workspaceFolderBasename}/${relativeFileDirname}",
       "group": {
         "kind": "test",
         "isDefault": true

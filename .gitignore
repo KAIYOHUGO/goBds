@@ -3,3 +3,4 @@
 /coverage.*
 test.*
 /vendor/*
+*.exe

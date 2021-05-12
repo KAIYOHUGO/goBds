@@ -2,30 +2,35 @@ package utils
 
 import (
 	"container/list"
+	"gobds/src/config"
 	"sync"
 )
 
+// Broadcast object
 type Broadcast struct {
-	List *list.List
+	list *list.List
 	sync.Mutex
 }
 
-// func (s *Broadcast) Init() {
-// s.list = list.New()
-// }
-func (s *Broadcast) Add(v chan interface{}) *list.Element {
-	return s.List.PushBack(v)
+func NewBroadcast() *Broadcast {
+	return &Broadcast{list: list.New().Init()}
 }
-func (s *Broadcast) Del(v *list.Element) {
-	s.List.Remove(v)
+
+// add a chan into broadcast.list
+func (s *Broadcast) Add() await {
+	v := make(chan interface{}, config.ChannelBufferSize)
+	s.list.PushBack(v)
+	return v
 }
+
+// send messenge into chan
 func (s *Broadcast) Say(v interface{}) {
 	s.Lock()
-	for i := s.List.Front(); i != nil; i = i.Next() {
+	for i := s.list.Front(); i != nil; i = i.Next() {
 		select {
 		case i.Value.(chan interface{}) <- v:
 		default:
-			s.Del(i)
+			s.list.Remove(i)
 		}
 	}
 	s.Unlock()

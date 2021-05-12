@@ -6,6 +6,7 @@ import (
 
 var DB map[string]*badger.DB
 
+// init database
 func init() {
 	var err error
 	dblist := []string{"server", "account"}

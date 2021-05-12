@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"gobds/src/config"
 	"gobds/src/database"
+	"gobds/src/hoster"
 	"gobds/src/utils"
 	"net/http"
 	"time"
@@ -62,7 +63,7 @@ func ServerTerminal(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	// get server info
-	var s database.Server
+	var s hoster.List
 	err = database.DB["server"].View(func(txn *badger.Txn) error {
 		t, err := txn.Get([]byte(vars["ServerID"]))
 		if err != nil {
@@ -81,8 +82,7 @@ func ServerTerminal(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	m := make(chan interface{})
-	s.Broadcast.Add(m)
+	m := s.Broadcast.Add()
 	for v := range m {
 		if _, _, err := ws.NextReader(); err != nil {
 			return

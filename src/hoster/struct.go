@@ -2,7 +2,6 @@ package hoster
 
 import (
 	"bufio"
-	"container/list"
 	"errors"
 	"gobds/src/utils"
 	"io"
@@ -30,7 +29,7 @@ type List struct {
 
 func (s *List) init() {
 	s.CmdChan = make(chan string, 10)
-	s.Broadcast = &utils.Broadcast{List: list.New()}
+	s.Broadcast = utils.NewBroadcast()
 	go func() {
 		for {
 			s.run()

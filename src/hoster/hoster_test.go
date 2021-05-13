@@ -10,7 +10,8 @@ func TestRun(t *testing.T) {
 	// ServerList["TOL"] = &List{Path: "./../../bds/testserver.bat"}
 	ServerList["TOL"] = &List{Path: "./../../bds/bedrock_server.exe"}
 	Run()
-	s := ServerList["TOL"].Broadcast.Add()
+	s, l := ServerList["TOL"].Broadcast.New()
+	defer ServerList["TOL"].Broadcast.Close(l)
 	go func() {
 		for i := range s {
 			utils.Log("broadcast:" + i.(string))

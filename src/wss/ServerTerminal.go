@@ -82,7 +82,8 @@ func ServerTerminal(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	m := s.Broadcast.Add()
+	m, l := s.Broadcast.New()
+	defer s.Broadcast.Close(l)
 	for v := range m {
 		if _, _, err := ws.NextReader(); err != nil {
 			return

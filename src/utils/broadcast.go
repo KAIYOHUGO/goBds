@@ -2,6 +2,7 @@ package utils
 
 import (
 	"container/list"
+	"errors"
 	"gobds/src/config"
 	"sync"
 )
@@ -17,10 +18,25 @@ func NewBroadcast() *Broadcast {
 }
 
 // add a chan into broadcast.list
-func (s *Broadcast) Add() await {
+func (s *Broadcast) New() (Promise, *list.Element) {
 	v := make(chan interface{}, config.ChannelBufferSize)
-	s.list.PushBack(v)
-	return v
+	return v, s.list.PushBack(v)
+}
+
+// add a chan into broadcast.list
+func (s *Broadcast) Close(v *list.Element) error {
+	select {
+	case _, ok := <-v.Value.(chan interface{}):
+		if ok {
+			close(v.Value.(chan interface{}))
+			return nil
+		}
+	default:
+		close(v.Value.(chan interface{}))
+		return nil
+	}
+
+	return errors.New("channel has been close")
 }
 
 // send messenge into chan
@@ -30,6 +46,7 @@ func (s *Broadcast) Say(v interface{}) {
 		select {
 		case i.Value.(chan interface{}) <- v:
 		default:
+			s.Close(i)
 			s.list.Remove(i)
 		}
 	}

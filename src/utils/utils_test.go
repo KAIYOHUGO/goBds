@@ -40,7 +40,8 @@ func TestArace(t *testing.T) {
 
 func TestBroadcast(t *testing.T) {
 	b := NewBroadcast()
-	c := b.Add()
+	c, l := b.New()
+	defer b.Close(l)
 	go func() {
 		for o := range c {
 			t.Log(o)

@@ -1,88 +1,54 @@
 package database
 
 import (
+	"bytes"
 	"encoding/base64"
-	"errors"
+	"encoding/gob"
+	"gobds/src/config"
 	"math/rand"
-	"sync"
 	"time"
+
+	"github.com/dgraph-io/badger/v3"
 )
 
-var (
-	Session = &session{}
-)
-
-type session struct {
-	list map[string]User
-	sync.Mutex
+// get session,input session id,return (struct,error)
+func GetSession(v string) (config.Session, error) {
+	var s config.Session
+	err := DB["session"].Update(func(txn *badger.Txn) error {
+		t, err := txn.Get([]byte(v))
+		if err != nil {
+			return err
+		}
+		v, err := t.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
+		err = gob.NewDecoder(bytes.NewBuffer(v)).Decode(&s)
+		if err != nil {
+			return err
+		}
+		return txn.SetEntry(badger.NewEntry(t.KeyCopy(nil), v).WithTTL(config.MaxSessionLiveTime))
+	})
+	return s, err
 }
 
-// User ...
-// ID is a map[string] in leveldb
-
-// Get ...
-// get session , return user struct
-// func (s *session) Get(v string) (User, error) {
-// 	s.Lock()
-// 	l, ok := s.list[v]
-// 	if !ok {
-// 		return User{}, errors.New("not find")
-// 	}
-// 	if l.time+config.MaxSessionLiveTime < time.Now().Unix() {
-// 		s.Unlock()
-// 		s.Del(v)
-// 		return User{}, errors.New("died")
-// 	}
-// 	l.time = time.Now().Unix()
-// 	s.Unlock()
-// 	return l, nil
-// }
-
-// Add ...
-// add a sesson ,return session id
-func (s *session) Add() (string, error) {
-	token := make([]byte, 64)
-	if _, err := rand.Read(token); err != nil {
+func NewSession(v config.Account) (string, error) {
+	rand.Seed(time.Now().UnixNano())
+	k := make([]byte, config.SessionIDLen)
+	rand.Read(k)
+	s := base64.URLEncoding.EncodeToString(k)
+	b, err := Encode(config.Session{Name: v.Name})
+	if err != nil {
 		return "", err
 	}
-	n := base64.URLEncoding.EncodeToString(token)
-	s.Lock()
-	_, ok := s.list[n]
-	s.Unlock()
-	if !ok {
-		return "", errors.New("aready exist")
-	}
-	s.list[n] = User{
-		// wip
-		// info: &db.User{},
-		time: time.Now().Unix(),
-	}
-
-	return n, nil
+	return s, DB["session"].Update(func(txn *badger.Txn) error {
+		return txn.Set([]byte(s), b)
+	})
 }
 
-// Del ...
-// delete a sesson ,return nil or err
-func (s *session) Del(v string) error {
-	_, ok := s.list[v]
-	if !ok {
-		return errors.New("not find")
-	}
-	delete(s.list, v)
-	return nil
-}
-
-// func CheckTime() {
-// 	for t := range time.NewTimer(time.Duration(config.MaxSessionLiveTime)).C {
-// 		for i, el := range Session.list {
-// 			if el.time+config.MaxSessionLiveTime < t.Unix() {
-// 				Session.Del(i)
-// 			}
-// 		}
-// 	}
-// }
-
-type User struct {
-	time int64
-	// info *db.User
+// delete session ,input session id,return error
+func DelSession(v string) error {
+	return DB["session"].Update(func(txn *badger.Txn) error {
+		return txn.Delete([]byte(v))
+	})
 }

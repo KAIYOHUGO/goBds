@@ -4,6 +4,7 @@ import (
 	"github.com/dgraph-io/badger/v3"
 )
 
+// has server,account,seesion
 var DB map[string]*badger.DB
 
 // init database

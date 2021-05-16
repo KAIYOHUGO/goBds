@@ -18,7 +18,6 @@ func TestEndecode(t *testing.T) {
 		panic(err)
 	}
 	t.Log(s.Name)
-	GC()
 }
 
 func TestSession(t *testing.T) {
@@ -40,7 +39,6 @@ func TestSession(t *testing.T) {
 		panic(err)
 	}
 	t.Log("not exist")
-	GC()
 }
 
 func TestReadWrite(t *testing.T) {
@@ -51,5 +49,7 @@ func TestReadWrite(t *testing.T) {
 		panic(err)
 	}
 	t.Log(s.Name, "=>", s.Password)
+}
+func TestGC(t *testing.T) {
 	GC()
 }

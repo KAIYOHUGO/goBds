@@ -9,4 +9,5 @@ const (
 	MaxAPIPayloadLen   = int(50)
 	WSHandshakeTimeout = time.Duration(1000)
 	ChannelBufferSize  = int(10)
+	SessionIDLen       = int(64)
 )

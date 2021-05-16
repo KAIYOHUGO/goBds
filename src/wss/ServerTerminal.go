@@ -1,8 +1,6 @@
 package wss
 
 import (
-	"bytes"
-	"encoding/gob"
 	"gobds/src/config"
 	"gobds/src/database"
 	"gobds/src/hoster"
@@ -10,7 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dgraph-io/badger/v3"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 )
@@ -47,38 +44,13 @@ func ServerTerminal(w http.ResponseWriter, r *http.Request) {
 		ws.Close()
 	}()
 	// updata session ttl
-	err = database.DB["session"].Update(func(txn *badger.Txn) error {
-		t, err := txn.Get([]byte(vars["SessionID"]))
-		if err != nil {
-			return err
-		}
-		v, err := t.ValueCopy(nil)
-		if err != nil {
-			return err
-		}
-		badger.NewEntry(t.KeyCopy(nil), v).WithTTL(config.MaxSessionLiveTime)
-		return nil
-	})
+	_, err = database.GetSession(vars["SessionID"])
 	if err != nil {
 		panic(err)
 	}
 	// get server info
 	var s hoster.List
-	err = database.DB["server"].View(func(txn *badger.Txn) error {
-		t, err := txn.Get([]byte(vars["ServerID"]))
-		if err != nil {
-			return err
-		}
-		v, err := t.ValueCopy(nil)
-		if err != nil {
-			return err
-		}
-		err = gob.NewDecoder(bytes.NewBuffer(v)).Decode(&s)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
+	err = database.Read(database.DB["server"], vars["ServerID"], s)
 	if err != nil {
 		panic(err)
 	}

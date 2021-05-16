@@ -16,6 +16,6 @@ func Wan(v string) {
 
 // Err ...
 // output error msg
-func Err(v string, e error) {
+func Err(v string, e interface{}) {
 	fmt.Printf("\033[31mError > \033[0m%s \033[31m: at\033[0m %s\n", v, e)
 }

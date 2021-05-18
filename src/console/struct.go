@@ -1,4 +1,4 @@
-package hoster
+package console
 
 import (
 	"bufio"

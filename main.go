@@ -1,8 +1,8 @@
 package main
 
 import (
+	"gobds/src/console"
 	"gobds/src/gc"
-	"gobds/src/hoster"
 	"gobds/src/utils"
 	"math/rand"
 	"os"
@@ -26,8 +26,8 @@ func main() {
 		utils.Log("exit")
 	}()
 	rand.Seed(time.Now().UnixNano())
-	utils.Log("start hoster...")
-	hoster.Run()
+	utils.Log("start console...")
+	console.Run()
 	utils.Log("start api server...")
 	router()
 	<-s

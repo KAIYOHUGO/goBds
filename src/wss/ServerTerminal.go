@@ -2,8 +2,8 @@ package wss
 
 import (
 	"gobds/src/config"
+	"gobds/src/console"
 	"gobds/src/database"
-	"gobds/src/hoster"
 	"gobds/src/utils"
 	"net/http"
 	"time"
@@ -49,7 +49,7 @@ func ServerTerminal(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	// get server info
-	var s hoster.List
+	var s console.List
 	err = database.Read(database.DB["server"], vars["ServerID"], s)
 	if err != nil {
 		panic(err)

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"gobds/src/console"
 	"gobds/src/gc"
 	"gobds/src/utils"
 	"math/rand"
@@ -27,7 +26,6 @@ func main() {
 	}()
 	rand.Seed(time.Now().UnixNano())
 	utils.Log("start console...")
-	console.Run()
 	utils.Log("start api server...")
 	router()
 	<-s

@@ -11,6 +11,13 @@ import (
 	"github.com/dgraph-io/badger/v3"
 )
 
+func NewToken(v int) string {
+	rand.Seed(time.Now().UnixNano())
+	k := make([]byte, v)
+	rand.Read(k)
+	return base64.URLEncoding.EncodeToString(k)
+}
+
 // get session,input session id,return (struct,error)
 func GetSession(v string) (config.Session, error) {
 	var s config.Session
@@ -33,14 +40,11 @@ func GetSession(v string) (config.Session, error) {
 }
 
 func NewSession(v config.Account) (string, error) {
-	rand.Seed(time.Now().UnixNano())
-	k := make([]byte, config.SessionIDLen)
-	rand.Read(k)
-	s := base64.URLEncoding.EncodeToString(k)
 	b, err := Encode(config.Session{Name: v.Name})
 	if err != nil {
 		return "", err
 	}
+	s := NewToken(config.SessionIDLen)
 	return s, DB["session"].Update(func(txn *badger.Txn) error {
 		return txn.Set([]byte(s), b)
 	})

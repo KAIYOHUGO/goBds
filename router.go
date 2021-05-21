@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"gobds/src/api"
+	"gobds/src/utils"
 	"gobds/src/wss"
+	"net"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -32,6 +35,12 @@ func router() {
 		rapi.HandleFunc("/server/{ServerID}", api.PUTServerFile).Methods("PUT")
 	}
 	// wss
-	r.HandleFunc("wss/server/{ServerID}/terminal/{SessionID}", wss.ServerTerminal)
-	http.ListenAndServe(":6623", r)
+	r.HandleFunc("/wss/server/{ServerID}/terminal/{SessionID}", wss.ServerTerminal)
+	l, err := net.Listen("tcp", ":0")
+	if err != nil {
+		panic(err)
+	}
+
+	utils.Log(fmt.Sprintf("Run on localhost:%d", l.Addr().(*net.TCPAddr).Port))
+	panic(http.Serve(l, r))
 }

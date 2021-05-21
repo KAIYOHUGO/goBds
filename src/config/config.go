@@ -1,13 +1,23 @@
 package config
 
-import "time"
+import (
+	"regexp"
+	"time"
+)
 
 const (
-	MaxSessionLiveTime = time.Duration(time.Minute * 60)
-	MaxCatchRam        = int(30)
-	MaxWSBufferSize    = int(1024 * 20)
-	MaxAPIPayloadLen   = int(50)
-	WSHandshakeTimeout = time.Duration(1000)
-	ChannelBufferSize  = int(10)
-	SessionIDLen       = int(64)
+	MaxSessionLiveTime     time.Duration = time.Minute * 60
+	MaxCatchRam            int           = 30
+	MaxWSBufferSize        int           = 1024 * 20
+	MaxAPIPayloadLen       int           = 50
+	WSHandshakeTimeout     time.Duration = 1000
+	ChannelSize            int           = 10
+	SessionIDLen           int           = 64
+	ServerIDLen            int           = 16
+	DefaultStartScriptName string        = "start.sh"
+	TestServerFile         string        = "../../bds/bedrock_server.exe"
+)
+
+var (
+	ConsoleOutput = regexp.MustCompile(`((?P<time>[\d:]{8})\s|^\[)(?P<level>[\w]*)\]\s(?P<output>.*)$`)
 )

@@ -39,9 +39,10 @@ func ServerTerminal(w http.ResponseWriter, r *http.Request) {
 	}
 	defer func() {
 		if err := recover(); err != nil {
-			ws.WriteControl(websocket.CloseMessage, []byte(err.(error).Error()), time.Now().Add(config.WSHandshakeTimeout))
+			ws.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(1000, err.(error).Error()), time.Now().Add(config.WSHandshakeTimeout))
+		} else {
+			ws.Close()
 		}
-		ws.Close()
 	}()
 	// updata session ttl
 	_, err = database.GetSession(vars["SessionID"])
@@ -49,17 +50,16 @@ func ServerTerminal(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	// get server info
-	var s console.List
-	err = database.Read(database.DB["server"], vars["ServerID"], s)
+	var s config.Server
+	err = database.Read(database.DB["server"], vars["ServerID"], &s)
 	if err != nil {
 		panic(err)
 	}
-	m, l := s.Broadcast.New()
-	defer s.Broadcast.Close(l)
+	m, l := console.ServerList[s.Name].Broadcast.New()
+	defer console.ServerList[s.Name].Broadcast.Close(l)
 	for v := range m {
-		if _, _, err := ws.NextReader(); err != nil {
+		if err := ws.WriteJSON(v.(console.Log)); err != nil {
 			return
 		}
-		ws.WriteMessage(websocket.TextMessage, []byte(v.(string)))
 	}
 }

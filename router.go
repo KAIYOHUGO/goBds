@@ -19,20 +19,20 @@ func router() {
 		rapi := r.PathPrefix("/api").Subrouter()
 
 		// session
-		rapi.HandleFunc("/session", api.POSTSession).Methods("POST")
-		rapi.HandleFunc("/session", api.DELETESession).Methods("DELETE")
+		rapi.HandleFunc("/session", api.POSTSession).Methods(http.MethodPost)
+		rapi.HandleFunc("/session", api.DELETESession).Methods(http.MethodDelete)
+		rapi.HandleFunc("/user", api.POSTUser).Methods("POST")
+		rapi.HandleFunc("/user", api.DELETEUser).Methods("DELETE")
 		{
 			// user
 			ruser := rapi.PathPrefix("/user/{UserID}").Subrouter()
-			ruser.HandleFunc("", api.POSTUser).Methods("POST")
-			ruser.HandleFunc("", api.DELETEUser).Methods("DELETE")
-			ruser.HandleFunc("/server", api.GETUserConfig).Methods("GET")
-			ruser.HandleFunc("/server", api.PUTUserConfig).Methods("PUT")
-			ruser.HandleFunc("/config", api.GETUserServer).Methods("GET")
+			ruser.HandleFunc("/server", api.GETUserConfig).Methods(http.MethodGet)
+			ruser.HandleFunc("/server", api.PUTUserConfig).Methods(http.MethodPut)
+			ruser.HandleFunc("/config", api.GETUserServer).Methods(http.MethodGet)
 
 		}
-		rapi.HandleFunc("/servers/{ServerID}", api.GETServerFile).Methods("GET")
-		rapi.HandleFunc("/server/{ServerID}", api.PUTServerFile).Methods("PUT")
+		rapi.HandleFunc("/servers/{ServerID}", api.GETServerFile).Methods(http.MethodGet)
+		rapi.HandleFunc("/server/{ServerID}", api.PUTServerFile).Methods(http.MethodPut)
 	}
 	// wss
 	r.HandleFunc("/wss/server/{ServerID}/terminal/{SessionID}", wss.ServerTerminal)

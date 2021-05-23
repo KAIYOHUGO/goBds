@@ -14,13 +14,11 @@ func init() {
 
 func main() {
 	utils.Log("starting ...")
-	s := make(chan struct{})
 	defer func() {
 		if err := recover(); err != nil {
 			utils.Err("exit at err", err)
 			os.Exit(10)
 		}
-		close(s)
 		gc.GC()
 		utils.Log("exit")
 	}()
@@ -28,5 +26,5 @@ func main() {
 	utils.Log("start console...")
 	utils.Log("start api server...")
 	router()
-	<-s
+	select {}
 }

@@ -15,7 +15,8 @@ const (
 	SessionIDLen           int           = 64
 	ServerIDLen            int           = 16
 	DefaultStartScriptName string        = "start.sh"
-	TestServerFile         string        = "../../bds/bedrock_server.exe"
+	// TestServerFile         string        = "../../bds/bedrock_server.exe"
+	TestServerFile string = "../../bds/testserver.sh"
 )
 
 var (

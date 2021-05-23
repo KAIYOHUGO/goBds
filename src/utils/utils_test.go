@@ -63,3 +63,9 @@ func TestMsg(t *testing.T) {
 	Wan("hello world")
 	Err("why", errors.New("u leave me"))
 }
+
+func TestSHA(t *testing.T) {
+	if s := Sha1([]byte("paula")); s != "62e52d2ac616f25dfddd0968a947fa7e84e5c086" {
+		t.Fatal(s)
+	}
+}

@@ -16,9 +16,9 @@ const (
 	ServerIDLen            int           = 16
 	DefaultStartScriptName string        = "start.sh"
 	// TestServerFile         string        = "../../bds/bedrock_server.exe"
-	TestServerFile string = "../../bds/testserver.sh"
+	TestServerFile string = "sh ../../bds/testserver.sh"
 )
 
 var (
-	ConsoleOutput = regexp.MustCompile(`((?P<time>[\d:]{8})\s|^\[)(?P<level>[\w]*)\]\s(?P<output>.*)$`)
+	ConsoleOutput = regexp.MustCompile(`(?P<level>[A-Z]*)\]\s(?P<output>.*)$`)
 )

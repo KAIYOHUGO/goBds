@@ -43,3 +43,18 @@ func TestWrapper(t *testing.T) {
 	w.InputQueue("stop")
 	t.Log(<-w.Err())
 }
+
+func TestUnFindFileWrapper(t *testing.T) {
+	w := NewWrapper("unfind file")
+	p, l := w.Broadcast.New()
+	defer w.Broadcast.Close(l)
+	go func() {
+		for v := range p {
+			t.Logf("%+v\n", v.(Log))
+			t.Log(w.Status)
+		}
+	}()
+	t.Log(w.Status)
+	w.InputQueue("$start")
+	t.Log(<-w.Err())
+}

@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+func TestHas(t *testing.T) {
+	if !Has(DB["account"], "admin") {
+		t.Fatal("not exist")
+	}
+}
+
 func TestEndecode(t *testing.T) {
 	b, err := Encode(config.Account{Name: "Paula"})
 	if err != nil {
@@ -50,6 +56,12 @@ func TestReadWrite(t *testing.T) {
 	}
 	t.Log(s.Name, "=>", s.Password)
 }
+func TestDelete(t *testing.T) {
+	if err := Delete(DB["account"], "Paula"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestGC(t *testing.T) {
 	GC()
 }

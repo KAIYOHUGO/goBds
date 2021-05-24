@@ -1,6 +1,8 @@
 package database
 
 import (
+	"gobds/src/config"
+
 	"github.com/dgraph-io/badger/v3"
 )
 
@@ -21,5 +23,8 @@ func init() {
 	DB["session"], err = badger.Open(badger.DefaultOptions("").WithInMemory(true))
 	if err != nil {
 		panic("can not start session DB" + err.Error())
+	}
+	if !Has(DB["account"], "admin") {
+		Write(DB["account"], "admin", config.Account{Name: "admin", Password: "12345678"})
 	}
 }

@@ -40,6 +40,7 @@ func router() {
 	if err != nil {
 		panic(err)
 	}
+	defer l.Close()
 
 	utils.Log(fmt.Sprintf("Run on localhost:%d", l.Addr().(*net.TCPAddr).Port))
 	panic(http.Serve(l, r))

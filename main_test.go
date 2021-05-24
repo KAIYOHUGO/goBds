@@ -2,16 +2,15 @@ package main
 
 import (
 	"testing"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
 
-func TestMain(t *testing.T) {
-	go main()
-	time.Sleep(time.Second * 20)
+// func TestMain(t *testing.T) {
+// 	go main()
+// 	time.Sleep(time.Second * 20)
 
-}
+// }
 
 func TestRouter(t *testing.T) {
 	go router()
@@ -19,9 +18,5 @@ func TestRouter(t *testing.T) {
 	if err != nil {
 		return
 	}
-	_, p, err := ws.ReadMessage()
-	if err != nil {
-		return
-	}
-	println(p)
+	defer ws.Close()
 }

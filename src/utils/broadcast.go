@@ -18,8 +18,11 @@ func NewBroadcast() *Broadcast {
 
 // add a chan into broadcast.list
 func (s *Broadcast) New() (Promise, *list.Element) {
+	s.Lock()
+	defer s.Unlock()
 	v := make(chan interface{}, config.ChannelSize)
-	return v, s.list.PushBack(v)
+	el := s.list.PushBack(v)
+	return v, el
 }
 
 // add a chan into broadcast.list
@@ -38,6 +41,7 @@ func (s *Broadcast) Close(v *list.Element) {
 // send messenge into chan
 func (s *Broadcast) Say(v interface{}) {
 	s.Lock()
+	defer s.Unlock()
 	for i := s.list.Front(); i != nil; i = i.Next() {
 		select {
 		case i.Value.(chan interface{}) <- v:
@@ -45,5 +49,4 @@ func (s *Broadcast) Say(v interface{}) {
 			s.Close(i)
 		}
 	}
-	s.Unlock()
 }

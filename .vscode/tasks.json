@@ -15,7 +15,7 @@
     {
       "label": "go test",
       "type": "shell",
-      "command": "go test -v ./${relativeFileDirname}",
+      "command": "go test -v ./${relativeFileDirname} -race",
       "group": {
         "kind": "test",
         "isDefault": true

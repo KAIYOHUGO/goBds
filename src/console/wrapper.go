@@ -3,6 +3,7 @@ package console
 import (
 	"gobds/src/config"
 	"gobds/src/utils"
+	"time"
 )
 
 type Wrapper struct {
@@ -89,15 +90,12 @@ func (s *Wrapper) worker() error {
 	for o.Scan() {
 		l, r := o.Text(), Log{}
 		m := config.ConsoleOutput.FindStringSubmatch(l)
+		r.Time = time.Now().Format("2006/01/02 15:04:05")
 		if len(m) == 0 {
 			r.Output = l
 		} else {
 			r.Level = m[config.ConsoleOutput.SubexpIndex("level")]
 			r.Output = m[config.ConsoleOutput.SubexpIndex("output")]
-			t := config.ConsoleOutput.SubexpIndex("time")
-			if t != -1 {
-				r.Time = m[t]
-			}
 		}
 		switch r.Output {
 		case "Server started.":

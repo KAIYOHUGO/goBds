@@ -7,14 +7,14 @@ import (
 )
 
 type Wrapper struct {
-	Broadcast *utils.Broadcast
-	Console   *Console
-	File      string
+	Broadcast *utils.Broadcast `json:"-"`
+	Console   *Console         `json:"-"`
+	File      string           `json:"file,omitempty"`
 	// 3 stopping
 	// 2 started
 	// 1 starting
 	// 0 init
-	Status uint8
+	Status uint8 `json:"status,omitempty"`
 	queue  chan string
 	err    chan error
 }
@@ -24,69 +24,74 @@ type Log struct {
 }
 
 func NewWrapper(v string) *Wrapper {
-	r := Wrapper{
+	r := &Wrapper{
 		Broadcast: utils.NewBroadcast(),
 		File:      v,
 		queue:     make(chan string, config.ChannelSize),
 		err:       make(chan error),
 	}
-	go func() {
-		defer close(r.err)
-		for {
-			select {
-			case r.err <- r.worker():
-				r.Status = 0
-			default:
-				<-r.err
+	go r.worker()
+	return r
+}
+func (s *Wrapper) InputQueue(v ...string) bool {
+	for _, i := range v {
+		select {
+		case s.queue <- i:
+		default:
+			return false
+		}
+	}
+	return true
+}
+func (s *Wrapper) Err() error {
+	return <-s.err
+}
+func (s *Wrapper) error(v error) {
+	if v == nil {
+		return
+	}
+	select {
+	case s.err <- v:
+	default:
+		<-s.err
+		s.err <- v
+	}
+}
+func (s *Wrapper) worker() {
+	for i := range s.queue {
+		switch i {
+		case "$start":
+			if s.Status == 0 {
+				go s.start()
+			}
+		case "$kill":
+			if s.Status > 0 {
+				if err := s.Console.Kill(); err != nil {
+					s.error(err)
+					break
+				}
+				s.Status = 0
+			}
+		default:
+			if s.Status > 0 {
+				s.Console.Input(i)
 			}
 		}
-	}()
-	return &r
+	}
 }
 
-func (s *Wrapper) worker() error {
-	var (
-		err error
-	)
-	quit := make(chan struct{})
-	defer func() {
-		close(quit)
-		if err := recover(); err != nil {
-			select {
-			case s.err <- err.(error):
-				s.Status = 0
-			default:
-				<-s.err
-			}
-		}
-	}()
+func (s *Wrapper) start() error {
+	var err error
 	s.Console, err = NewConsole(s.File)
 	if err != nil {
 		return err
 	}
+	if err := s.Console.Start(); err != nil {
+		return err
+	}
+	s.Status = 1
 	defer s.Console.Kill()
 	o := s.Console.Output()
-	go func() {
-		for {
-			select {
-			case i := <-s.queue:
-				if i[0] == '$' {
-					switch i[1:] {
-					case "start":
-						if s.Console.Start() == nil {
-							s.Status = 1
-						}
-					case "kill":
-						s.Console.Kill()
-					}
-					continue
-				}
-				s.Console.Input(i)
-			case <-quit:
-				return
-			}
-		}
-	}()
 	for o.Scan() {
 		l, r := o.Text(), Log{}
 		m := config.ConsoleOutput.FindStringSubmatch(l)
@@ -106,17 +111,4 @@ func (s *Wrapper) worker() error {
 		s.Broadcast.Say(r)
 	}
 	return s.Console.Wait()
-}
-func (s *Wrapper) InputQueue(v ...string) bool {
-	for _, i := range v {
-		select {
-		case s.queue <- i:
-		default:
-			return false
-		}
-	}
-	return true
-}
-func (s *Wrapper) Err() <-chan error {
-	return s.err
 }

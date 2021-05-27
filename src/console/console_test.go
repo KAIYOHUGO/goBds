@@ -3,6 +3,7 @@ package console
 import (
 	"gobds/src/config"
 	"testing"
+	"time"
 )
 
 func TestConsole(t *testing.T) {
@@ -35,13 +36,16 @@ func TestWrapper(t *testing.T) {
 			t.Log(w.Status)
 		}
 	}()
+	go func() {
+		for v := w.Err(); v != nil; v = w.Err() {
+			t.Log("error", v)
+		}
+	}()
 	t.Log(w.Status)
 	w.InputQueue("$start")
+	time.Sleep(time.Second)
 	w.InputQueue("stop")
-	t.Log(<-w.Err())
-	w.InputQueue("$start")
-	w.InputQueue("stop")
-	t.Log(<-w.Err())
+	time.Sleep(time.Second * 15)
 }
 
 func TestUnFindFileWrapper(t *testing.T) {
@@ -56,5 +60,8 @@ func TestUnFindFileWrapper(t *testing.T) {
 	}()
 	t.Log(w.Status)
 	w.InputQueue("$start")
-	t.Log(<-w.Err())
+	w.File = config.TestServerFile
+	time.Sleep(time.Second)
+	w.InputQueue("$start")
+	time.Sleep(time.Second * 20)
 }

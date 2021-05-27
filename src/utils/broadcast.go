@@ -27,6 +27,8 @@ func (s *Broadcast) New() (Promise, *list.Element) {
 
 // add a chan into broadcast.list
 func (s *Broadcast) Close(v *list.Element) {
+	s.Lock()
+	defer s.Unlock()
 	select {
 	case _, ok := <-v.Value.(chan interface{}):
 		if ok {

@@ -1,26 +1,15 @@
 package api
 
 import (
-	"encoding/json"
 	"gobds/src/config"
 	"gobds/src/database"
 	"gobds/src/utils"
 	"net/http"
 )
 
-type ReqUser struct {
-	Name     string `json:"name,omitempty"`
-	Password string `json:"password,omitempty"`
-}
-
-func POSTUser(w http.ResponseWriter, r *http.Request) {
-	defer SendResponse(w, r)
-	if _, ok := GetLoginSession(r); !ok {
+func POSTUser(j *Request, w http.ResponseWriter, r *http.Request) *API {
+	if _, _, ok := GetLoginSession(r); !ok {
 		panic(StatusUnauthorized)
-	}
-	var j ReqUser
-	if json.NewDecoder(r.Body).Decode(&j) != nil {
-		panic(StatusBadRequest)
 	}
 	if !utils.IsExist(j.Name, j.Password) {
 		panic(StatusUnprocessableEntity)
@@ -31,31 +20,28 @@ func POSTUser(w http.ResponseWriter, r *http.Request) {
 	database.Write(database.DB["account"], j.Name, config.Account{Name: j.Name, Password: utils.Sha1([]byte(j.Password))})
 	panic(&API{
 		Status: http.StatusCreated,
-		ErrorMessenge: &Response{
+		Body: &Response{
 			Messenge: "User create suceess",
 		},
 	})
 }
-func DELETEUser(w http.ResponseWriter, r *http.Request) {
-	defer SendResponse(w, r)
-	if _, ok := GetLoginSession(r); !ok {
-		panic(StatusUnauthorized)
+func DELETEUser(j *Request, w http.ResponseWriter, r *http.Request) *API {
+	if _, _, ok := GetLoginSession(r); !ok {
+		return StatusUnauthorized
 	}
-	var j ReqUser
-	json.NewDecoder(r.Body).Decode(&j)
 	if !utils.IsExist(j.Name) {
-		panic(StatusUnprocessableEntity)
+		return StatusUnprocessableEntity
 	}
 	if !database.Has(database.DB["account"], j.Name) {
-		panic(StatusNotFound)
+		return StatusNotFound
 	}
 	if database.Delete(database.DB["account"], j.Name) != nil {
-		panic(StatusInternalServerError)
+		return StatusInternalServerError
 	}
-	panic(&API{
+	return &API{
 		Status: http.StatusOK,
-		ErrorMessenge: &Response{
+		Body: &Response{
 			Messenge: "Delete user success",
 		},
-	})
+	}
 }

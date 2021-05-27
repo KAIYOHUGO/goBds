@@ -19,16 +19,16 @@ func router() {
 		rapi := r.PathPrefix("/api").Subrouter()
 
 		// session
-		rapi.HandleFunc("/session", api.POSTSession).Methods(http.MethodPost)
-		rapi.HandleFunc("/session", api.DELETESession).Methods(http.MethodDelete)
-		rapi.HandleFunc("/user", api.POSTUser).Methods("POST")
-		rapi.HandleFunc("/user", api.DELETEUser).Methods("DELETE")
+		rapi.HandleFunc("/session", api.Wrapper(api.POSTSession)).Methods(http.MethodPost)
+		rapi.HandleFunc("/session", api.Wrapper(api.DELETESession)).Methods(http.MethodDelete)
+		rapi.HandleFunc("/user", api.Wrapper(api.POSTUser)).Methods("POST")
+		rapi.HandleFunc("/user", api.Wrapper(api.DELETEUser)).Methods("DELETE")
 		{
 			// user
 			ruser := rapi.PathPrefix("/user/{UserID}").Subrouter()
 			ruser.HandleFunc("/server", api.GETUserConfig).Methods(http.MethodGet)
 			ruser.HandleFunc("/server", api.PUTUserConfig).Methods(http.MethodPut)
-			ruser.HandleFunc("/config", api.GETUserServer).Methods(http.MethodGet)
+			ruser.HandleFunc("/config", api.Wrapper(api.GETUserServers)).Methods(http.MethodGet)
 
 		}
 		rapi.HandleFunc("/servers/{ServerID}", api.GETServerFile).Methods(http.MethodGet)

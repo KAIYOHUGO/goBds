@@ -1,18 +1,19 @@
 package api
 
 import (
-	"encoding/json"
+	"gobds/src/console"
 	"net/http"
 )
 
 type Response struct {
-	Error    string `json:"error,omitempty"`
-	Messenge string `json:"messenge,omitempty"`
+	Error    string                      `json:"error,omitempty"`
+	Messenge string                      `json:"messenge,omitempty"`
+	Servers  map[string]*console.Wrapper `json:"servers,omitempty"`
 }
 
 type API struct {
-	Status        int
-	ErrorMessenge *Response
+	Status int
+	Body   *Response
 }
 
 const (
@@ -23,7 +24,7 @@ var (
 	// http 400
 	StatusBadRequest = &API{
 		Status: http.StatusBadRequest,
-		ErrorMessenge: &Response{
+		Body: &Response{
 			Error:    "Bad request",
 			Messenge: "Server can't decode request",
 		},
@@ -31,14 +32,14 @@ var (
 	// http 401
 	StatusUnauthorized = &API{
 		Status: http.StatusUnauthorized,
-		ErrorMessenge: &Response{
+		Body: &Response{
 			Error:    "Unauthorized",
 			Messenge: "Login fail,check password or username again",
 		},
 	}
 	StatusNotFound = &API{
 		Status: http.StatusNotFound,
-		ErrorMessenge: &Response{
+		Body: &Response{
 			Error:    "Not Found",
 			Messenge: "Resource not found in the database",
 		},
@@ -46,7 +47,7 @@ var (
 	// http 409
 	StatusConflict = &API{
 		Status: http.StatusConflict,
-		ErrorMessenge: &Response{
+		Body: &Response{
 			Error:    "Conflict",
 			Messenge: "Resource already exist",
 		},
@@ -54,7 +55,7 @@ var (
 	// http 422
 	StatusUnprocessableEntity = &API{
 		Status: http.StatusUnprocessableEntity,
-		ErrorMessenge: &Response{
+		Body: &Response{
 			Error:    "Unprocessable Entity",
 			Messenge: "Some filed are missing",
 		},
@@ -62,23 +63,9 @@ var (
 	// http 500
 	StatusInternalServerError = &API{
 		Status: http.StatusInternalServerError,
-		ErrorMessenge: &Response{
+		Body: &Response{
 			Error:    "Internal Server Error",
 			Messenge: "Unknow server error",
 		},
 	}
 )
-
-func SendResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", jsontype)
-	if err := recover(); err != nil {
-		e, ok := err.(*API)
-		if !ok {
-			w.WriteHeader(StatusInternalServerError.Status)
-			json.NewEncoder(w).Encode(StatusInternalServerError.ErrorMessenge)
-			return
-		}
-		w.WriteHeader(e.Status)
-		json.NewEncoder(w).Encode(e.ErrorMessenge)
-	}
-}

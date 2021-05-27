@@ -2,8 +2,11 @@ package api
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"gobds/src/config"
+	"gobds/src/console"
 	"gobds/src/database"
 	"io/ioutil"
 	"net/http"
@@ -33,16 +36,16 @@ func TestAPI(t *testing.T) {
 		rapi := r.PathPrefix("/api").Subrouter()
 
 		// session
-		rapi.HandleFunc("/session", POSTSession).Methods("POST")
-		rapi.HandleFunc("/session", DELETESession).Methods("DELETE")
-		rapi.HandleFunc("/user", POSTUser).Methods("POST")
-		rapi.HandleFunc("/user", DELETEUser).Methods("DELETE")
+		rapi.HandleFunc("/session", Wrapper(POSTSession)).Methods("POST")
+		rapi.HandleFunc("/session", Wrapper(DELETESession)).Methods("DELETE")
+		rapi.HandleFunc("/user", Wrapper(POSTUser)).Methods("POST")
+		rapi.HandleFunc("/user", Wrapper(DELETEUser)).Methods("DELETE")
 		{
 			// user
 			ruser := rapi.PathPrefix("/user/{UserID}").Subrouter()
-			ruser.HandleFunc("/server", GETUserConfig).Methods("GET")
-			ruser.HandleFunc("/server", PUTUserConfig).Methods("PUT")
-			ruser.HandleFunc("/config", GETUserServer).Methods("GET")
+			ruser.HandleFunc("/config", GETUserConfig).Methods("GET")
+			ruser.HandleFunc("/config", PUTUserConfig).Methods("PUT")
+			ruser.HandleFunc("/servers", Wrapper(GETUserServers)).Methods("GET")
 
 		}
 		rapi.HandleFunc("/servers/{ServerID}", GETServerFile).Methods("GET")
@@ -55,7 +58,7 @@ func TestAPI(t *testing.T) {
 		// 12345678
 		Password: "7c222fb2927d828af22f592134e8932480637c0d",
 	})
-
+	console.ServerList["test"] = console.NewWrapper(config.TestServerFile)
 	var session string
 	// funcs
 	testsession := func(t *testing.T) {
@@ -119,7 +122,7 @@ func TestAPI(t *testing.T) {
 			t.Log(session)
 		}
 		{
-			b, err := json.Marshal(&ReqUser{
+			b, err := json.Marshal(&Request{
 				Name:     "Sorry",
 				Password: "Paula0623",
 			})
@@ -160,6 +163,23 @@ func TestAPI(t *testing.T) {
 			t.Log(session)
 		}
 	}
+	testuserserver := func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/user/%s/servers", s.URL, base64.URLEncoding.EncodeToString([]byte("Sorry"))), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Authorization", "Bearer "+session)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Log(string(b))
+	}
 	t.Run("session", testsession)
 	t.Run("user", testuser)
+	t.Run("user server", testuserserver)
 }

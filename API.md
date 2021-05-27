@@ -1,3 +1,5 @@
+ID:name base63url encode
+
 ```bash
 /+
  |-api/+
@@ -7,12 +9,15 @@
  |     |      |
  |     |      |
  |     |      |-{UserID}+
- |     |                |-server
+ |     |                |-servers
  |     |                |-config
  |     |
  |     |
- |     |-server/{ServerID}+
- |                         |-file
+ |     |-server/+ #post=create server, delete=delete server
+ |              |
+ |              |
+ |              |{ServerID}/+
+ |                          |-file
  |
  |
  |-wss/+

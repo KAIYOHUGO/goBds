@@ -7,8 +7,7 @@ import (
 	"net/http"
 )
 
-func POSTSession(w http.ResponseWriter, r *http.Request) {
-	defer SendResponse(w, r)
+func POSTSession(j *Request, w http.ResponseWriter, r *http.Request) *API {
 	name, password, ok := r.BasicAuth()
 	if !ok {
 		panic(StatusBadRequest)
@@ -18,34 +17,33 @@ func POSTSession(w http.ResponseWriter, r *http.Request) {
 	}
 	var a config.Account
 	if err := database.Read(database.DB["account"], name, &a); err != nil {
-		panic(StatusUnauthorized)
+		return StatusUnauthorized
 	}
 	if utils.Sha1([]byte(password)) != a.Password {
-		panic(StatusUnauthorized)
+		return StatusUnauthorized
 	}
 	session, err := database.NewSession(a)
 	if err != nil {
-		panic(StatusInternalServerError)
+		return StatusInternalServerError
 	}
 	w.Header().Set("Authorization", "Bearer "+session)
-	panic(&API{
+	return &API{
 		Status: http.StatusCreated,
-		ErrorMessenge: &Response{
+		Body: &Response{
 			Messenge: "login suceess",
 		},
-	})
+	}
 }
-func DELETESession(w http.ResponseWriter, r *http.Request) {
-	defer SendResponse(w, r)
-	session, ok := GetLoginSession(r)
+func DELETESession(j *Request, w http.ResponseWriter, r *http.Request) *API {
+	_, session, ok := GetLoginSession(r)
 	if !ok {
-		panic(StatusUnauthorized)
+		return StatusUnauthorized
 	}
 	if err := database.DelSession(session); err != nil {
-		panic(StatusUnauthorized)
+		return StatusInternalServerError
 	}
-	panic(&API{
-		Status:        http.StatusOK,
-		ErrorMessenge: &Response{Messenge: "Logout suceess"},
-	})
+	return &API{
+		Status: http.StatusOK,
+		Body:   &Response{Messenge: "Logout suceess"},
+	}
 }

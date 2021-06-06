@@ -8,9 +8,11 @@ import (
 	"gobds/src/config"
 	"gobds/src/console"
 	"gobds/src/database"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gorilla/mux"
@@ -36,10 +38,12 @@ func TestAPI(t *testing.T) {
 		rapi := r.PathPrefix("/api").Subrouter()
 
 		// session
-		rapi.HandleFunc("/session", Wrapper(POSTSession)).Methods("POST")
-		rapi.HandleFunc("/session", Wrapper(DELETESession)).Methods("DELETE")
-		rapi.HandleFunc("/user", Wrapper(POSTUser)).Methods("POST")
-		rapi.HandleFunc("/user", Wrapper(DELETEUser)).Methods("DELETE")
+		rapi.HandleFunc("/session", Wrapper(POSTSession)).Methods(http.MethodPost)
+		rapi.HandleFunc("/session", Wrapper(DELETESession)).Methods(http.MethodDelete)
+		rapi.HandleFunc("/user", Wrapper(POSTUser)).Methods(http.MethodPost)
+		rapi.HandleFunc("/user", Wrapper(DELETEUser)).Methods(http.MethodDelete)
+		rapi.HandleFunc("/server", Wrapper(PostServer)).Methods(http.MethodPost)
+		rapi.HandleFunc("/server", Wrapper(DeleteServer)).Methods(http.MethodDelete)
 		{
 			// user
 			ruser := rapi.PathPrefix("/user/{UserID}").Subrouter()
@@ -48,8 +52,20 @@ func TestAPI(t *testing.T) {
 			ruser.HandleFunc("/servers", Wrapper(GETUserServers)).Methods("GET")
 
 		}
-		rapi.HandleFunc("/servers/{ServerID}", GETServerFile).Methods("GET")
-		rapi.HandleFunc("/server/{ServerID}", PUTServerFile).Methods("PUT")
+		{
+			rserver := rapi.PathPrefix("/server/{ServerID}").Subrouter()
+			rserver.HandleFunc("/input", Wrapper(POSTServerInput)).Methods(http.MethodPost)
+			{
+				// server
+				rserverfile := rserver.PathPrefix("/file").Subrouter()
+				rserverfile.HandleFunc("", Wrapper(GETServerFile)).Methods(http.MethodGet)
+				rserverfile.HandleFunc("/{Path}", Wrapper(GETServerFile)).Methods(http.MethodGet)
+				rserverfile.HandleFunc("/{Path}", Wrapper(PUTServerFile)).Methods(http.MethodPut)
+				rserverfile.HandleFunc("/{Path}:{Type}", Wrapper(POSTServerFile)).Methods(http.MethodPost)
+				rserverfile.HandleFunc("/{Path}", Wrapper(DELETEServerFile)).Methods(http.MethodDelete)
+				rserverfile.HandleFunc("/{Path}:{NewPath}", Wrapper(PATCHServerFile)).Methods(http.MethodPatch)
+			}
+		}
 	}
 	s := httptest.NewServer(r)
 	defer s.Close()
@@ -58,7 +74,12 @@ func TestAPI(t *testing.T) {
 		// 12345678
 		Password: "7c222fb2927d828af22f592134e8932480637c0d",
 	})
-	console.ServerList["test"] = console.NewWrapper(config.TestServerFile)
+	database.Write(database.DB["server"], "test", config.Server{
+		Name:    "test",
+		Path:    config.TestServerPath,
+		Command: config.TestServerCommand,
+	})
+	console.ServerList["test"] = console.NewWrapper(config.TestServerPath, config.TestServerPath+config.TestServerCommand)
 	var session string
 	// funcs
 	testsession := func(t *testing.T) {
@@ -163,7 +184,7 @@ func TestAPI(t *testing.T) {
 			t.Log(session)
 		}
 	}
-	testuserserver := func(t *testing.T) {
+	testuserservers := func(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/user/%s/servers", s.URL, base64.URLEncoding.EncodeToString([]byte("Sorry"))), nil)
 		if err != nil {
 			t.Fatal(err)
@@ -179,7 +200,103 @@ func TestAPI(t *testing.T) {
 		}
 		t.Log(string(b))
 	}
+	testserver := func(t *testing.T) {
+
+		b, err := json.Marshal(&Request{
+			Server:  "TOL",
+			Path:    "",
+			Command: "",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		req, err := http.NewRequest(http.MethodPost, s.URL+"/api/server", bytes.NewBuffer(b))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Authorization", "Bearer "+session)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		o, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Log(string(o))
+
+		req, err = http.NewRequest(http.MethodDelete, s.URL+"/api/server", bytes.NewBuffer(b))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Authorization", "Bearer "+session)
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		o, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Log(string(o))
+
+	}
+	testserverfile := func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/server/%s/file", s.URL, base64.URLEncoding.EncodeToString([]byte("test"))), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Authorization", "Bearer "+session)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+
+		req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/server/%s/file/%s", s.URL, base64.URLEncoding.EncodeToString([]byte("test")), "release-notes.txt"), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Authorization", "Bearer "+session)
+		resp, err = http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+	}
+	testserverinput := func(t *testing.T) {
+		b, err := json.Marshal(&Request{
+			Input: "$start",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/server/%s/input", s.URL, base64.URLEncoding.EncodeToString([]byte("test"))), bytes.NewReader(b))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Authorization", "Bearer "+session)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Log(string(b))
+		resp.Body.Close()
+	}
 	t.Run("session", testsession)
 	t.Run("user", testuser)
-	t.Run("user server", testuserserver)
+	t.Run("user server", testuserservers)
+	t.Run("server", testserver)
+	t.Run("server file", testserverfile)
+	t.Run("server input", testserverinput)
 }

@@ -9,7 +9,7 @@ import (
 // Broadcast object
 type Broadcast struct {
 	list *list.List
-	sync.Mutex
+	lock sync.Mutex
 }
 
 func NewBroadcast() *Broadcast {
@@ -18,8 +18,8 @@ func NewBroadcast() *Broadcast {
 
 // add a chan into broadcast.list
 func (s *Broadcast) New() (Promise, *list.Element) {
-	s.Lock()
-	defer s.Unlock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	v := make(chan interface{}, config.ChannelSize)
 	el := s.list.PushBack(v)
 	return v, el
@@ -27,8 +27,8 @@ func (s *Broadcast) New() (Promise, *list.Element) {
 
 // add a chan into broadcast.list
 func (s *Broadcast) Close(v *list.Element) {
-	s.Lock()
-	defer s.Unlock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	select {
 	case _, ok := <-v.Value.(chan interface{}):
 		if ok {
@@ -42,8 +42,8 @@ func (s *Broadcast) Close(v *list.Element) {
 
 // send messenge into chan
 func (s *Broadcast) Say(v interface{}) {
-	s.Lock()
-	defer s.Unlock()
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	for i := s.list.Front(); i != nil; i = i.Next() {
 		select {
 		case i.Value.(chan interface{}) <- v:

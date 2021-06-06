@@ -25,7 +25,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			ServerList[string(it.Item().KeyCopy(nil))] = NewWrapper(s.Path + config.DefaultStartScriptName)
+			ServerList[string(it.Item().KeyCopy(nil))] = NewWrapper(s.Path, s.Command)
 		}
 		return nil
 	})

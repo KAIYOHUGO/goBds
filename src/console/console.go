@@ -13,10 +13,11 @@ type Console struct {
 	stdout io.Reader
 }
 
-func NewConsole(v string) (*Console, error) {
+func NewConsole(p string, c string) (*Console, error) {
 	r := &Console{
-		proc: exec.Command(v),
+		proc: exec.Command(c),
 	}
+	r.proc.Dir = p
 	var err error
 	r.stdin, err = r.proc.StdinPipe()
 	if err != nil {
@@ -39,8 +40,12 @@ func (s *Console) Kill() error {
 	return errors.New("nil pointer")
 }
 func (s *Console) Input(v string) error {
-	_, err := s.stdin.Write([]byte(v + "\n"))
-	return err
+	if s != nil && s.stdin != nil {
+		_, err := s.stdin.Write([]byte(v + "\n"))
+
+		return err
+	}
+	return errors.New("nil pointer")
 }
 func (s *Console) Output() *bufio.Scanner {
 	return bufio.NewScanner(s.stdout)

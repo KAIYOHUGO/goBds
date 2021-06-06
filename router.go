@@ -31,8 +31,8 @@ func router() {
 			ruser.HandleFunc("/config", api.Wrapper(api.GETUserServers)).Methods(http.MethodGet)
 
 		}
-		rapi.HandleFunc("/servers/{ServerID}", api.GETServerFile).Methods(http.MethodGet)
-		rapi.HandleFunc("/server/{ServerID}", api.PUTServerFile).Methods(http.MethodPut)
+		// rapi.HandleFunc("/servers/{ServerID}", api.GETServerFile).Methods(http.MethodGet)
+		// rapi.HandleFunc("/server/{ServerID}", api.PUTServerFile).Methods(http.MethodPut)
 	}
 	// wss
 	r.HandleFunc("/wss/server/{ServerID}/terminal/{SessionID}", wss.ServerTerminal)

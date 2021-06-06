@@ -7,24 +7,24 @@ import (
 	"net/http"
 )
 
-func POSTSession(j *Request, w http.ResponseWriter, r *http.Request) *API {
+func POSTSession(j *Request, w http.ResponseWriter, r *http.Request) (*API, error) {
 	name, password, ok := r.BasicAuth()
 	if !ok {
-		panic(StatusBadRequest)
+		return StatusBadRequest, nil
 	}
 	if !utils.IsExist(name, password) {
-		panic(StatusUnprocessableEntity)
+		return StatusUnprocessableEntity, nil
 	}
 	var a config.Account
 	if err := database.Read(database.DB["account"], name, &a); err != nil {
-		return StatusUnauthorized
+		return StatusUnauthorized, err
 	}
 	if utils.Sha1([]byte(password)) != a.Password {
-		return StatusUnauthorized
+		return StatusUnauthorized, nil
 	}
 	session, err := database.NewSession(a)
 	if err != nil {
-		return StatusInternalServerError
+		return StatusInternalServerError, err
 	}
 	w.Header().Set("Authorization", "Bearer "+session)
 	return &API{
@@ -32,18 +32,18 @@ func POSTSession(j *Request, w http.ResponseWriter, r *http.Request) *API {
 		Body: &Response{
 			Messenge: "login suceess",
 		},
-	}
+	}, nil
 }
-func DELETESession(j *Request, w http.ResponseWriter, r *http.Request) *API {
+func DELETESession(j *Request, w http.ResponseWriter, r *http.Request) (*API, error) {
 	_, session, ok := GetLoginSession(r)
 	if !ok {
-		return StatusUnauthorized
+		return StatusUnauthorized, nil
 	}
 	if err := database.DelSession(session); err != nil {
-		return StatusInternalServerError
+		return StatusInternalServerError, err
 	}
 	return &API{
 		Status: http.StatusOK,
 		Body:   &Response{Messenge: "Logout suceess"},
-	}
+	}, nil
 }

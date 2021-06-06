@@ -7,7 +7,7 @@ import (
 )
 
 func TestConsole(t *testing.T) {
-	s, err := NewConsole(config.TestServerFile)
+	s, err := NewConsole(config.TestServerPath, config.TestServerPath+config.TestServerCommand)
 	if err != nil {
 		panic(err)
 	}
@@ -27,9 +27,10 @@ func TestConsole(t *testing.T) {
 }
 
 func TestWrapper(t *testing.T) {
-	w := NewWrapper(config.TestServerFile)
-	p, l := w.Broadcast.New()
-	defer w.Broadcast.Close(l)
+	w := NewWrapper(config.TestServerPath, config.TestServerPath+config.TestServerCommand)
+	p, l := w.Join()
+	defer w.Leave(l)
+
 	go func() {
 		for v := range p {
 			t.Logf("%+v\n", v.(Log))
@@ -49,18 +50,23 @@ func TestWrapper(t *testing.T) {
 }
 
 func TestUnFindFileWrapper(t *testing.T) {
-	w := NewWrapper("unfind file")
-	p, l := w.Broadcast.New()
-	defer w.Broadcast.Close(l)
+	w := NewWrapper("unfind file", "")
+	p, l := w.Join()
+	defer w.Leave(l)
 	go func() {
 		for v := range p {
 			t.Logf("%+v\n", v.(Log))
 			t.Log(w.Status)
 		}
 	}()
+	go func() {
+		for v := w.Err(); v != nil; v = w.Err() {
+			t.Log("error", v)
+		}
+	}()
 	t.Log(w.Status)
 	w.InputQueue("$start")
-	w.File = config.TestServerFile
+	w.Command = config.TestServerPath
 	time.Sleep(time.Second)
 	w.InputQueue("$start")
 	time.Sleep(time.Second * 20)

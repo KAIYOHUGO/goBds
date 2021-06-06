@@ -18,6 +18,7 @@ ID:name base63url encode
  |              |
  |              |{ServerID}/+
  |                          |-file
+ |                          |-input
  |
  |
  |-wss/+

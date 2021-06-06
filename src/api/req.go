@@ -12,6 +12,9 @@ type Request struct {
 	Name     string `json:"name,omitempty"`
 	Password string `json:"password,omitempty"`
 	Server   string `json:"server,omitempty"`
+	Path     string `json:"path,omitempty"`
+	Command  string `json:"command,omitempty"`
+	Input    string `json:"input,omitempty"`
 }
 
 func GetToken(v string) (string, error) {

@@ -55,8 +55,8 @@ func ServerTerminal(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	m, l := console.ServerList[s.Name].Broadcast.New()
-	defer console.ServerList[s.Name].Broadcast.Close(l)
+	m, l := console.ServerList[s.Name].Join()
+	defer console.ServerList[s.Name].Leave(l)
 	for v := range m {
 		if err := ws.WriteJSON(v.(console.Log)); err != nil {
 			return

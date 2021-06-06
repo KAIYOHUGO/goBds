@@ -1,14 +1,14 @@
 package api
 
 import (
-	"gobds/src/console"
+	"gobds/src/config"
 	"net/http"
 )
 
 type Response struct {
-	Error    string                      `json:"error,omitempty"`
-	Messenge string                      `json:"messenge,omitempty"`
-	Servers  map[string]*console.Wrapper `json:"servers,omitempty"`
+	Error    string                    `json:"error,omitempty"`
+	Messenge string                    `json:"messenge,omitempty"`
+	Servers  map[string]*config.Server `json:"servers,omitempty"`
 }
 
 type API struct {
@@ -66,6 +66,14 @@ var (
 		Body: &Response{
 			Error:    "Internal Server Error",
 			Messenge: "Unknow server error",
+		},
+	}
+	// http 503
+	StatusServiceUnavailable = &API{
+		Status: http.StatusServiceUnavailable,
+		Body: &Response{
+			Error:    "Service Unavailable",
+			Messenge: "Try again later",
 		},
 	}
 )

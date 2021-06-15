@@ -48,7 +48,7 @@ func TestAPI(t *testing.T) {
 			// user
 			ruser := rapi.PathPrefix("/user/{UserID}").Subrouter()
 			ruser.HandleFunc("/config", GETUserConfig).Methods("GET")
-			ruser.HandleFunc("/config", PUTUserConfig).Methods("PUT")
+			// ruser.HandleFunc("/config", PUTUserConfig).Methods("PUT")
 			ruser.HandleFunc("/servers", Wrapper(GETUserServers)).Methods("GET")
 
 		}
@@ -204,7 +204,6 @@ func TestAPI(t *testing.T) {
 
 		b, err := json.Marshal(&Request{
 			Server:  "TOL",
-			Path:    "",
 			Command: "",
 		})
 		if err != nil {

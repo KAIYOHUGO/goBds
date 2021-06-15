@@ -1,11 +1,14 @@
 package api
 
 import (
+	"encoding/base64"
 	"gobds/src/config"
 	"gobds/src/console"
 	"gobds/src/database"
 	"gobds/src/utils"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 func PostServer(j *Request, w http.ResponseWriter, r *http.Request) (*API, error) {
@@ -20,12 +23,18 @@ func PostServer(j *Request, w http.ResponseWriter, r *http.Request) (*API, error
 	}
 	if err := database.Write(database.DB["server"], j.Server, &config.Server{
 		Name:    j.Server,
-		Path:    j.Path,
 		Command: j.Command,
 	}); err != nil {
 		return StatusInternalServerError, err
 	}
-	console.ServerList[j.Server] = console.NewWrapper(j.Path, j.Command)
+	rootPath, err := filepath.Abs(config.ServerRootDir + base64.URLEncoding.EncodeToString([]byte(j.Server)))
+	if err != nil {
+		return StatusInternalServerError, err
+	}
+	if err := os.MkdirAll(rootPath, os.ModePerm); err != nil {
+		return StatusInternalServerError, err
+	}
+	console.ServerList[j.Server] = console.NewWrapper(rootPath, j.Command)
 	return &API{
 		Status: http.StatusCreated,
 		Body: &Response{
@@ -50,6 +59,10 @@ func DeleteServer(j *Request, w http.ResponseWriter, r *http.Request) (*API, err
 	server, ok := console.ServerList[j.Server]
 	if !ok {
 		return StatusInternalServerError, nil
+	}
+	rootPath, _ := filepath.Abs(config.ServerRootDir + base64.URLEncoding.EncodeToString([]byte(j.Server)))
+	if err := os.RemoveAll(rootPath); err != nil {
+		return StatusInternalServerError, err
 	}
 	server.GC()
 	return &API{

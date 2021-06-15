@@ -9,12 +9,12 @@ import (
 )
 
 type Request struct {
-	Name     string `json:"name,omitempty"`
-	Password string `json:"password,omitempty"`
-	Server   string `json:"server,omitempty"`
-	Path     string `json:"path,omitempty"`
-	Command  string `json:"command,omitempty"`
-	Input    string `json:"input,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Password    string `json:"password,omitempty"`
+	NewPassword string `json:"newpassword,omitempty"`
+	Server      string `json:"server,omitempty"`
+	Command     string `json:"command,omitempty"`
+	Input       string `json:"input,omitempty"`
 }
 
 func GetToken(v string) (string, error) {
@@ -27,6 +27,7 @@ func GetToken(v string) (string, error) {
 	return v[7:], nil
 }
 
+// string: token,bool: is login
 func GetLoginSession(r *http.Request) (config.Session, string, bool) {
 	token, err := GetToken(r.Header.Get("Authorization"))
 	if err != nil {

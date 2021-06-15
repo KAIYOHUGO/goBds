@@ -29,7 +29,7 @@ func init() {
 			// user
 			ruser := rapi.PathPrefix("/user/{UserID}").Subrouter()
 			ruser.HandleFunc("/config", api.GETUserConfig).Methods("GET")
-			// ruser.HandleFunc("/config", api.PUTUserConfig).Methods("PUT")
+			ruser.HandleFunc("/config", api.Wrapper(api.PUTUserConfig)).Methods("PUT")
 			ruser.HandleFunc("/servers", api.Wrapper(api.GETUserServers)).Methods("GET")
 
 		}

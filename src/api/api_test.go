@@ -48,7 +48,7 @@ func TestAPI(t *testing.T) {
 			// user
 			ruser := rapi.PathPrefix("/user/{UserID}").Subrouter()
 			ruser.HandleFunc("/config", GETUserConfig).Methods("GET")
-			// ruser.HandleFunc("/config", PUTUserConfig).Methods("PUT")
+			ruser.HandleFunc("/config", Wrapper(PUTUserConfig)).Methods("PUT")
 			ruser.HandleFunc("/servers", Wrapper(GETUserServers)).Methods("GET")
 
 		}

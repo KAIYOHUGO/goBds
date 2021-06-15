@@ -25,6 +25,6 @@ func init() {
 		panic("can not start session DB" + err.Error())
 	}
 	if !Has(DB["account"], "admin") {
-		Write(DB["account"], "admin", config.Account{Name: "admin", Password: "12345678"})
+		Write(DB["account"], "admin", config.Account{Name: "admin", Password: "7c222fb2927d828af22f592134e8932480637c0d"})
 	}
 }

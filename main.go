@@ -22,9 +22,5 @@ func main() {
 		gc.GC()
 		utils.Log("exit")
 	}()
-	rand.Seed(time.Now().UnixNano())
-	utils.Log("start console...")
-	utils.Log("start api server...")
-	router()
 	select {}
 }

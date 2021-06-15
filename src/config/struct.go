@@ -14,5 +14,6 @@ type Account struct {
 
 // session
 type Session struct {
-	Name string `json:"name,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Password string `json:"password,omitempty"`
 }

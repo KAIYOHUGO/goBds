@@ -14,6 +14,7 @@ const (
 	ChannelSize        int           = 10
 	SessionIDLen       int           = 64
 	ServerIDLen        int           = 16
+	ServerRootDir      string        = "./servers/"
 	TestServerPath     string        = "C:/Users/kymcm/Documents/VSCode/gobds/bds/"
 	TestServerCommand  string        = "bedrock_server.exe"
 	// TestServerPath    string = "sh bds/"

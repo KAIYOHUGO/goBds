@@ -40,7 +40,10 @@ func GetSession(v string) (config.Session, error) {
 }
 
 func NewSession(v config.Account) (string, error) {
-	b, err := Encode(config.Session{Name: v.Name})
+	b, err := Encode(config.Session{
+		Name:     v.Name,
+		Password: v.Password,
+	})
 	if err != nil {
 		return "", err
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func router() {
+func init() {
 	r := mux.NewRouter()
 	r.Use(mux.CORSMethodMiddleware(r))
 	{
@@ -21,18 +21,32 @@ func router() {
 		// session
 		rapi.HandleFunc("/session", api.Wrapper(api.POSTSession)).Methods(http.MethodPost)
 		rapi.HandleFunc("/session", api.Wrapper(api.DELETESession)).Methods(http.MethodDelete)
-		rapi.HandleFunc("/user", api.Wrapper(api.POSTUser)).Methods("POST")
-		rapi.HandleFunc("/user", api.Wrapper(api.DELETEUser)).Methods("DELETE")
+		rapi.HandleFunc("/user", api.Wrapper(api.POSTUser)).Methods(http.MethodPost)
+		rapi.HandleFunc("/user", api.Wrapper(api.DELETEUser)).Methods(http.MethodDelete)
+		rapi.HandleFunc("/server", api.Wrapper(api.PostServer)).Methods(http.MethodPost)
+		rapi.HandleFunc("/server", api.Wrapper(api.DeleteServer)).Methods(http.MethodDelete)
 		{
 			// user
 			ruser := rapi.PathPrefix("/user/{UserID}").Subrouter()
-			ruser.HandleFunc("/server", api.GETUserConfig).Methods(http.MethodGet)
-			ruser.HandleFunc("/server", api.PUTUserConfig).Methods(http.MethodPut)
-			ruser.HandleFunc("/config", api.Wrapper(api.GETUserServers)).Methods(http.MethodGet)
+			ruser.HandleFunc("/config", api.GETUserConfig).Methods("GET")
+			// ruser.HandleFunc("/config", api.PUTUserConfig).Methods("PUT")
+			ruser.HandleFunc("/servers", api.Wrapper(api.GETUserServers)).Methods("GET")
 
 		}
-		// rapi.HandleFunc("/servers/{ServerID}", api.GETServerFile).Methods(http.MethodGet)
-		// rapi.HandleFunc("/server/{ServerID}", api.PUTServerFile).Methods(http.MethodPut)
+		{
+			rserver := rapi.PathPrefix("/server/{ServerID}").Subrouter()
+			rserver.HandleFunc("/input", api.Wrapper(api.POSTServerInput)).Methods(http.MethodPost)
+			{
+				// server
+				rserverfile := rserver.PathPrefix("/file").Subrouter()
+				rserverfile.HandleFunc("", api.Wrapper(api.GETServerFile)).Methods(http.MethodGet)
+				rserverfile.HandleFunc("/{Path}", api.Wrapper(api.GETServerFile)).Methods(http.MethodGet)
+				rserverfile.HandleFunc("/{Path}", api.Wrapper(api.PUTServerFile)).Methods(http.MethodPut)
+				rserverfile.HandleFunc("/{Path}:{Type}", api.Wrapper(api.POSTServerFile)).Methods(http.MethodPost)
+				rserverfile.HandleFunc("/{Path}", api.Wrapper(api.DELETEServerFile)).Methods(http.MethodDelete)
+				rserverfile.HandleFunc("/{Path}:{NewPath}", api.Wrapper(api.PATCHServerFile)).Methods(http.MethodPatch)
+			}
+		}
 	}
 	// wss
 	r.HandleFunc("/wss/server/{ServerID}/terminal/{SessionID}", wss.ServerTerminal)

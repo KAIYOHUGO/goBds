@@ -19,7 +19,7 @@ jobs:
       - name: Init vendor
         run: go mod vendor
       - name: Build
-        run: go build -v ./...
+        run: go build -v .
   coverage:
     runs-on: ubuntu-latest
     needs: [build]
